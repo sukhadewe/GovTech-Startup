@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Land Sathi — ज़मीन मार्गदर्शक AI</title>
+  <meta name="description" content="Land Sathi - AI-powered land records guide for Indian farmers. Get help with 7/12 extract, mutation, heir entry, and Talathi office processes in Hindi, Marathi, and English.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css?v=8">
+</head>
+<body>
+  <!-- ============ NAVBAR ============ -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="/" class="nav-brand">
+        <div class="nav-logo">
+          <img src="/images/logo.png" alt="Land Sathi Logo" style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
+        <div>
+          <h1 class="nav-title">Land Sathi</h1>
+          <p class="nav-subtitle">ज़मीन माहिती मार्गदर्शक</p>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <div class="lang-switcher" id="langSwitcher">
+          <button class="lang-btn active" data-lang="mr">मराठी</button>
+          <button class="lang-btn" data-lang="hi">हिंदी</button>
+          <button class="lang-btn" data-lang="en">ENG</button>
+        </div>
+        <button class="nav-menu-btn" id="menuToggle" aria-label="Menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ HERO SECTION ============ -->
+  <section class="hero" id="heroSection">
+    <div class="hero-inner">
+      <div class="hero-badge">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+        <span data-i18n="heroBadge">१००% सुरक्षित Land Records Guide</span>
+      </div>
+      <h2 class="hero-title" data-i18n="heroTitle">जमिनीच्या प्रश्नांचे <em>AI-powered</em> उत्तर</h2>
+      <p class="hero-desc" data-i18n="heroDesc">७/१२ उतारा, फेरफार, वारस नोंद — सर्व माहिती सोप्या मराठीत.</p>
+
+      <div class="search-box" id="searchBox">
+        <div class="search-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
+        <input type="text" id="heroSearch" placeholder="७/१२ उतारा कसा काढायचा?" data-i18n-placeholder="searchPlaceholder">
+        <button class="search-btn" id="heroSearchBtn">
+          <span data-i18n="searchBtn">विचारा</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ QUICK ACTIONS ============ -->
+  <section class="quick-actions" id="quickActions">
+    <div class="section-inner">
+      <div class="qa-grid">
+        <button class="qa-card" data-query="7/12 उतारा क्या होता है और कैसे निकालें?">
+          <div class="qa-icon blue">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+          </div>
+          <span class="qa-label" data-i18n="qa712">7/12 उतारा</span>
+          <span class="qa-sub">(Satbara)</span>
+        </button>
+
+        <button class="qa-card" data-query="फेरफार (Mutation) कैसे करें? पूरी प्रक्रिया बताएं।">
+          <div class="qa-icon green">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22h6a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v10"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10.4 12.6a2 2 0 1 1 3 3L8 21l-4 1 1-4Z"/></svg>
+          </div>
+          <span class="qa-label" data-i18n="qaFerfar">फेरफार</span>
+          <span class="qa-sub">(Mutation)</span>
+        </button>
+
+        <button class="qa-card" data-query="ज़मीन अपने नाम कैसे करें? ट्रांसफर की पूरी प्रक्रिया बताइए।">
+          <div class="qa-icon orange">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12h8"/><path d="M16 8l4 4-4 4"/><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
+          </div>
+          <span class="qa-label" data-i18n="qaTransfer">ज़मीन ट्रांसफर</span>
+          <span class="qa-sub">(Transfer)</span>
+        </button>
+
+        <button class="qa-card" data-query="वारस नोंद (Heir Entry) कैसे करें? क्या दस्तावेज़ चाहिए?">
+          <div class="qa-icon purple">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><circle cx="6" cy="19" r="3"/><circle cx="18" cy="19" r="3"/><path d="M12 8v4"/><path d="M12 12h6v4"/><path d="M12 12H6v4"/></svg>
+          </div>
+          <span class="qa-label" data-i18n="qaWaras">वारस नोंद</span>
+          <span class="qa-sub">(Heir Entry)</span>
+        </button>
+
+        <button class="qa-card" data-query="तलाठी कार्यालय में कौन-कौन से काम होते हैं?">
+          <div class="qa-icon teal">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg>
+          </div>
+          <span class="qa-label" data-i18n="qaTalathi">तलाठी ऑफिस</span>
+          <span class="qa-sub">(Talathi)</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LAND TOOLS & LINKS ============ -->
+  <section class="land-tools" id="landTools">
+    <div class="section-inner">
+      <div class="section-badge" style="margin-bottom: 12px;">स्मार्ट टूल्स</div>
+      <h2 class="section-title" style="margin-bottom: 40px;">शेतकरी डिजिटल मदत केंद्र</h2>
+      
+      <div class="tools-grid">
+        <!-- Land Converter -->
+        <div class="tool-card converter">
+          <div class="tool-header">
+            <div class="tool-icon-circle blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 21V10a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v11"/><path d="M3 21h18"/><path d="M12 4v4"/><path d="M10 4h4"/></svg>
+            </div>
+            <h3 data-i18n="toolTitle1">क्षेत्रफळ कॅल्क्युलेटर</h3>
+          </div>
+          <div class="converter-box">
+            <div class="input-group">
+              <input type="number" id="unitValue" placeholder="संख्या लिहा..." value="1">
+              <select id="fromUnit">
+                <option value="hec">हेक्टर</option>
+                <option value="acre" selected>एकर</option>
+                <option value="gun">गुंठा</option>
+                <option value="sqm">चौ.मी</option>
+              </select>
+            </div>
+            <div class="result-list" id="resultBoard" style="margin-top: 12px; grid-template-columns: 1fr 1fr;">
+              <!-- Results -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Weather Card -->
+        <div class="tool-card weather" id="weatherCard">
+          <div class="tool-header">
+            <div class="tool-icon-circle orange">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128 4.001 4.001 0 0 0-3.322 4.128C4.5 13.064 3 14.74 3 17.5a3.5 3.5 0 0 0 3.5 3.5h11a3.5 3.5 0 0 0 3.5-3.5c0-2.76-1.5-4.436-3.613-4.85z"/></svg>
+            </div>
+            <h3>हवामान अंदाज 🌦️</h3>
+          </div>
+          <div id="weatherContent">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">तुमच्या गावातील हवामान पाहण्यासाठी क्लिक करा:</p>
+            <button id="getWeatherBtn" style="width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--primary); color: white; font-weight: 700; cursor: pointer; transition: 0.3s;">हवामान पहा</button>
+          </div>
+        </div>
+
+        <!-- Official Links -->
+        <div class="tool-card links">
+          <div class="tool-header">
+            <div class="tool-icon-circle green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <h3 data-i18n="toolTitle2">महत्त्वाच्या लिंक्स</h3>
+          </div>
+          <div class="links-list">
+            <a href="https://bhulekh.mahabhumi.gov.in/" target="_blank" class="link-item"><span>7/12 व फेरफार</span></a>
+            <a href="https://digitalsatbara.mahabhumi.gov.in/aaplichawdi/" target="_blank" class="link-item"><span>आपली चावडी</span></a>
+            <a href="https://digitalsatbara.mahabhumi.gov.in/" target="_blank" class="link-item"><span>डिजिटल 7/12</span></a>
+          </div>
+        </div>
+
+        <!-- Panchang Card -->
+        <div class="tool-card panchang" id="panchangCard">
+          <div class="tool-header">
+            <div class="tool-icon-circle purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+            </div>
+            <h3 data-i18n="panchangTitle">आजचा दिनविशेष 📆</h3>
+          </div>
+          <div id="panchangContent">
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 0;">
+              <span id="panchangDate" style="font-size:20px; font-weight:800; color:var(--primary); margin-bottom:8px;">लोड होत आहे...</span>
+              <span id="panchangTime" style="font-size:14px; font-weight:700; color:var(--text-main);">...</span>
+            </div>
+            <div style="padding:10px; background:var(--bg); border-radius:8px; font-size:12px; font-weight:600; text-align:center; color:var(--text-sub); margin-top:10px;" data-i18n="panchangDesc">
+              शुभ मुहूर्त आणि तिथी नुसार कामे करा.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHAT SECTION ============ -->
+  <section class="chat-section" id="chatSection">
+    <div class="section-inner">
+      <div class="chat-container">
+        <div class="chat-header">
+          <div class="chat-avatar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M7 5H3"/></svg>
+            <span class="chat-status-dot"></span>
+          </div>
+          <div>
+            <h3 class="chat-title">Land Sathi AI</h3>
+            <p class="chat-subtitle" data-i18n="chatSubtitle">🟢 Live — उत्तर तयार आहेत</p>
+          </div>
+          <div class="chat-actions">
+            <button class="chat-clear-btn" id="chatClearBtn" title="Clear Chat">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </button>
+            <button class="chat-close-btn" id="chatCloseBtn" title="Close Chat">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <!-- Messages will be appended here -->
+        </div>
+
+        <div class="chat-input-wrapper">
+          <div class="chat-input-box">
+            <button class="chat-mic-btn" id="chatMicBtn" title="बोलून प्रश्न विचारा">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </button>
+            <input type="text" id="chatInput" placeholder="तुमचा प्रश्न इथे लिहा..." data-i18n-placeholder="chatPlaceholder">
+            <!-- Hidden file input -->
+            <input type="file" id="chatFileInput" accept="image/*,.pdf" style="display: none;">
+            <button class="chat-file-btn" id="chatFileBtn" title="कागदपत्र अपलोड करा">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </button>
+            <button class="chat-send-btn" id="chatSendBtn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="m22 2-11 11"/></svg>
+            </button>
+          </div>
+          <p class="chat-disclaimer" data-i18n="chatDisclaimer">ही माहिती फक्त मार्गदर्शनासाठी आहे. अधिकृत कामासाठी संबंधित कार्यालयाशी संपर्क साधा.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <section class="features" id="features">
+    <div class="section-inner">
+      <h3 class="section-title" data-i18n="featuresTitle">Land Sathi तुम्हाला कशी मदत करतो?</h3>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon blue">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M7 5H3"/></svg>
+          </div>
+          <h4 data-i18n="feat1Title">AI मार्गदर्शन</h4>
+          <p data-i18n="feat1Desc">Gemini AI च्या मदतीने सोप्या भाषेत उत्तर — मराठी, हिंदी, English.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon green">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <h4 data-i18n="feat2Title">दस्तावेज चेकलिस्ट</h4>
+          <p data-i18n="feat2Desc">कोणती कागदपत्रे लागतात ते पहा.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon orange">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </div>
+          <h4 data-i18n="feat3Title">Step-by-Step प्रक्रिया</h4>
+          <p data-i18n="feat3Desc">प्रत्येक कामाची संपूर्ण प्रक्रिया — सोप्या भाषेत.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon purple">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <h4 data-i18n="feat4Title">योजना व सबसिडी</h4>
+          <p data-i18n="feat4Desc" style="margin-bottom: 16px;">शेतकऱ्यांसाठी नवीन सरकारी योजनांची माहिती व अपडेट्स.</p>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <a href="https://mahadbt.maharashtra.gov.in/Farmer/Login/Login" target="_blank" style="font-size: 13px; font-weight: 700; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+              <span>MahaDBT (महाडीबीटी)</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+            <a href="https://pmkisan.gov.in/" target="_blank" style="font-size: 13px; font-weight: 700; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+              <span>PM Kisan (पी.एम. किसान)</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="section-inner">
+      <div class="footer-brand">
+        <img src="/images/logo.png" alt="Land Sathi" style="width: 32px; height: 32px; object-fit: contain; margin-right: 8px;">
+        <span>Land Sathi</span>
+      </div>
+      <p class="footer-disclaimer" data-i18n="footerDisclaimer">हे व्यासपीठ माहितीपूर्ण मार्गदर्शन प्रदान करते. हे अधिकृत सरकारी संकेतस्थळ नाही.</p>
+
+      <div class="footer-links">
+        <a href="#" class="page-link" data-page="about" data-i18n="footerAbout">आमच्याबद्दल</a>
+        <a href="#" class="page-link" data-page="privacy" data-i18n="footerPrivacy">गोपनीयता धोरण</a>
+        <a href="#" class="page-link" data-page="terms" data-i18n="footerTerms">अटी आणि शर्ती</a>
+        <a href="#" class="page-link" data-page="contact" data-i18n="footerContact">संपर्क</a>
+        <span>•</span>
+        <span>help@landsathi.ai</span>
+      </div>
+      <p style="font-size: 11px; color: var(--text-muted); margin-top: 16px;">© 2026 Land Sathi All Records AI</p>
+    </div>
+  </footer>
+
+  <!-- ============ PAGE MODAL ============ -->
+  <div id="pageModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close" id="closeModal">&times;</button>
+      <h2 id="modalTitle"></h2>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- ============ FLOATING CHAT BUTTON ============ -->
+  <button class="fab" id="fabBtn" title="AI Assistant">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M7 5H3"/></svg>
+  </button>
+
+  <script src="/js/app.js?v=5"></script>
+</body>
+</html>

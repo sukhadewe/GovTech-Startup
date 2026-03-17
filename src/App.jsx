@@ -337,6 +337,7 @@ const WeatherCard = () => {
         const { latitude, longitude } = pos.coords
         const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`)
         const json = await res.json()
+        if (!json || !json.current || !json.daily) throw new Error('Invalid response')
         setData({
           temp: json.current.temperature_2m,
           rainProb: json.daily.precipitation_probability_max[0],
@@ -344,13 +345,19 @@ const WeatherCard = () => {
           lon: longitude
         })
       } catch (err) {
+        console.error("Weather fetch error:", err)
         setError(t('weatherError'))
       } finally {
         setLoading(false)
       }
-    }, () => {
+    }, (err) => {
+      console.warn("Geolocation error:", err)
       setError(t('weatherPermission'))
       setLoading(false)
+    }, {
+      timeout: 10000,
+      enableHighAccuracy: false,
+      maximumAge: 300000
     })
   }
 

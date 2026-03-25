@@ -24,6 +24,7 @@ import DocAnalyzer from './DocAnalyzer'
 import CaseTracker from './CaseTracker'
 import CommunityForum from './CommunityForum'
 import FarmerProfile from './FarmerProfile'
+import SevenTwelveFlow from './SevenTwelveFlow'
 
 // 1. ERASED (MOVED TO LangContext.jsx)
 
@@ -1068,247 +1069,272 @@ const ToolsView = ({ onNavigate }) => {
 
 const HomeView = ({ onNavigate, onSelectAction }) => {
   const { t, lang } = useLang()
-  const [query, setQuery] = useState('')
-  const [isListening, setIsListening] = useState(false)
+  const [show712, setShow712] = useState(false)
+  const [isLoggedIn] = useState(false) // false = guest, set to true to test logged-in view
 
-  const handleVoiceSearch = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      alert(lang === 'mr' ? 'तुमचा ब्राउझर व्हॉइस सर्चला सपोर्ट करत नाही.' : 'Your browser does not support Voice Search.')
-      return
-    }
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    const recognition = new SpeechRecognition()
-    recognition.lang = lang === 'mr' ? 'mr-IN' : lang === 'hi' ? 'hi-IN' : 'en-IN'
-    
-    recognition.onstart = () => setIsListening(true)
-    recognition.onresult = (event) => {
-      setQuery(event.results[0][0].transcript)
-      setIsListening(false)
-    }
-    recognition.onerror = () => setIsListening(false)
-    recognition.onend = () => setIsListening(false)
-    recognition.start()
+  // Labels in current language
+  const L = {
+    heroBtn: lang === 'mr' ? '🌾 माझी जमीन शोधा (1 क्लिक)' : lang === 'hi' ? '🌾 मेरी जमीन खोजें (1 क्लिक)' : '🌾 Find My Land (1 Click)',
+    heroSub: lang === 'mr' ? '७/१२ · फेरफार · नकाशा — सगळे एकाच ठिकाणी' : lang === 'hi' ? '7/12 · फेरफार · नक्शा — सब एक जगह' : '7/12 · Mutation · Map — all in one place',
+    mainActions: lang === 'mr' ? 'मुख्य सेवा' : lang === 'hi' ? 'मुख्य सेवाएं' : 'Core Services',
+    mainActionsHint: lang === 'mr' ? 'एक क्लिकमध्ये तुमचे काम सुरू करा' : lang === 'hi' ? 'एक क्लिक में अपना काम शुरू करें' : 'Start your work in one click',
+    discoveryTitle: lang === 'mr' ? 'जलद माहिती' : lang === 'hi' ? 'त्वरित जानकारी' : 'Quick Info',
+    guestTitle: lang === 'mr' ? 'Login करा आणि जास्त फायदे मिळवा' : lang === 'hi' ? 'Login करें और अधिक लाभ पाएं' : 'Login for more features',
+    guestSub: lang === 'mr' ? 'रेकॉर्ड सेव्ह करा, अलर्ट मिळवा, इतिहास पाहा' : lang === 'hi' ? 'रिकॉर्ड सेव करें, अलर्ट पाएं, इतिहास देखें' : 'Save records, get alerts, view history',
+    loginBtn: lang === 'mr' ? 'Login / Register →' : lang === 'hi' ? 'Login / Register →' : 'Login / Register →',
+    addLand: lang === 'mr' ? '+ नवीन जमीन जोडा' : lang === 'hi' ? '+ नई जमीन जोड़ें' : '+ Add New Land',
   }
 
+  const PRIMARY_ACTIONS = [
+    {
+      id: '712-wizard',
+      icon: <FileText size={32} className="text-white" />,
+      label: lang === 'mr' ? '७/१२ डाउनलोड' : lang === 'hi' ? '7/12 डाउनलोड' : '7/12 Download',
+      sub: lang === 'mr' ? 'सातबारा उतारा' : lang === 'hi' ? 'सातबारा उतारा' : 'Satbara Extract',
+      color: 'from-[#1E3A8A] to-[#2563EB]',
+      shadow: 'shadow-blue-500/30',
+      action: () => setShow712(true)
+    },
+    {
+      id: 'stamp',
+      icon: <Calculator size={32} className="text-white" />,
+      label: lang === 'mr' ? 'मुद्रांक शुल्क' : lang === 'hi' ? 'स्टाम्प ड्यूटी' : 'Stamp Duty',
+      sub: lang === 'mr' ? 'कॅल्क्युलेटर' : lang === 'hi' ? 'कैलकुलेटर' : 'Calculator',
+      color: 'from-emerald-500 to-teal-600',
+      shadow: 'shadow-emerald-500/30',
+      action: () => onNavigate('tools')
+    },
+    {
+      id: 'property',
+      icon: <Building2 size={32} className="text-white" />,
+      label: lang === 'mr' ? 'मालमत्ता माहिती' : lang === 'hi' ? 'संपत्ति जानकारी' : 'Property Info',
+      sub: lang === 'mr' ? 'रेकॉर्ड तपासा' : lang === 'hi' ? 'रिकॉर्ड देखें' : 'Record Check',
+      color: 'from-violet-500 to-purple-600',
+      shadow: 'shadow-purple-500/30',
+      action: () => onSelectAction('712')
+    },
+  ]
+
+  const DISCOVERY_CARDS = [
+    {
+      emoji: '🧾',
+      title: lang === 'mr' ? 'Offline Records' : lang === 'hi' ? 'Offline Records' : 'Offline Records',
+      benefit: lang === 'mr' ? 'Internet नसताना पण पाहा' : lang === 'hi' ? 'Internet न हो, तो भी देखें' : 'View even without internet',
+      color: 'from-gray-800 to-indigo-900',
+      action: () => onNavigate('profile')
+    },
+    {
+      emoji: '🌾',
+      title: 'PM Kisan Status',
+      benefit: lang === 'mr' ? '₹6,000 येणार का? चेक करा' : lang === 'hi' ? '₹6,000 आएगा? चेक करें' : 'Check if ₹6,000 is coming',
+      color: 'from-orange-500 to-red-500',
+      action: () => onSelectAction('quiz')
+    },
+    {
+      emoji: '✍️',
+      title: lang === 'mr' ? 'Digital Sign ७/१२' : 'Digital Sign 7/12',
+      benefit: lang === 'mr' ? 'बँकेसाठी अधिकृत प्रत मिळवा' : lang === 'hi' ? 'बैंक के लिए आधिकारिक प्रति' : 'Official copy for bank use',
+      color: 'from-blue-500 to-indigo-600',
+      action: () => setShow712(true)
+    },
+    {
+      emoji: '📊',
+      title: lang === 'mr' ? 'Market Rate 2026' : 'Market Rate 2026',
+      benefit: lang === 'mr' ? 'जमिनीची सरकारी किंमत पाहा' : lang === 'hi' ? 'सरकारी जमीन दर देखें' : 'Check official land rates',
+      color: 'from-purple-500 to-pink-600',
+      action: () => onNavigate('tools')
+    },
+  ]
+
   return (
-    <div className="space-y-12 px-4 pb-20 pt-4 max-w-7xl mx-auto">
-      {/* 1. Header Section */}
-      <section className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button onClick={() => onNavigate('profile')} className="w-14 h-14 bg-[#1E3A8A] rounded-[22px] flex items-center justify-center text-white border-2 border-white shadow-xl hover:scale-110 transition-all duration-300">
-            <UserIcon size={28} />
-          </button>
-          <div>
-            <h2 className="text-2xl font-black text-gray-900 leading-tight">Rajesh Patil</h2>
-            <p className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-widest inline-flex items-center gap-1.5 mt-1">
-               <ShieldCheck size={12} /> Premium Member
-            </p>
+    <>
+      {/* 7/12 Wizard Overlay */}
+      <AnimatePresence>
+        {show712 && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <SevenTwelveFlow onBack={() => setShow712(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="space-y-10 px-4 pb-24 pt-4 max-w-2xl mx-auto">
+
+        {/* 1. Header */}
+        <section className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={() => onNavigate('profile')} className="w-12 h-12 bg-[#1E3A8A] rounded-[18px] flex items-center justify-center text-white shadow-lg hover:scale-110 transition-all">
+              <UserIcon size={22} />
+            </button>
+            <div>
+              <h2 className="text-lg font-black text-gray-900 leading-tight">
+                {isLoggedIn ? 'Rajesh Patil' : (lang === 'mr' ? 'स्वागत आहे 👋' : lang === 'hi' ? 'स्वागत है 👋' : 'Welcome 👋')}
+              </h2>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Land Sathi</p>
+            </div>
           </div>
-        </div>
-        <div className="flex gap-3">
-           <button className="w-12 h-12 bg-white border border-gray-100 rounded-2xl flex items-center justify-center text-gray-500 shadow-sm hover:bg-gray-50 transition-all"><Bell size={24} /></button>
-           <button onClick={() => onNavigate('chat')} className="w-12 h-12 bg-[#1E3A8A] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 hover:scale-110 transition-all"><MessageCircle size={24} /></button>
-        </div>
-      </section>
+          <div className="flex gap-2">
+            <button className="w-10 h-10 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-500 shadow-sm hover:bg-gray-50"><Bell size={20} /></button>
+            <button onClick={() => onNavigate('chat')} className="w-10 h-10 bg-[#1E3A8A] rounded-xl flex items-center justify-center text-white shadow-lg hover:scale-105 transition-all"><MessageCircle size={20} /></button>
+          </div>
+        </section>
 
-      {/* 2. Manage Portfolio Card (Premium Glassmorphism) */}
-      <section className="relative group overflow-hidden rounded-[40px] shadow-[0_30px_60px_rgba(30,58,138,0.15)]">
-         <div className="absolute inset-0 bg-gradient-to-br from-[#1E3A8A] via-[#2563EB] to-[#3B82F6]"></div>
-         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-white/15 transition-all duration-700"></div>
-         <div className="relative p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-10">
-            <div className="space-y-8">
-               <div className="space-y-2">
-                  <span className="text-[11px] font-black uppercase tracking-[0.3em] text-white/60">{t('manageHomeCardSub')}</span>
-                  <h3 className="text-4xl md:text-5xl font-black text-white tracking-tight">{t('manageHomeCardTitle')}</h3>
-               </div>
-               <div className="flex gap-12 items-end">
-                  <div className="space-y-2">
-                     <span className="block text-white/50 text-[10px] font-black uppercase tracking-widest">{t('manageStat2Title')}</span>
-                     <span className="text-4xl font-black text-white leading-none">04</span>
-                  </div>
-                  <div className="h-10 w-px bg-white/10 mb-1"></div>
-                  <div className="space-y-2">
-                     <span className="block text-white/50 text-[10px] font-black uppercase tracking-widest">Verified</span>
-                     <span className="text-4xl font-black text-emerald-400 leading-none flex items-center gap-2">03 <CheckCircle2 size={24} /></span>
-                  </div>
-               </div>
-               <button onClick={() => onNavigate('profile')} className="px-10 py-4 bg-white text-[#1E3A8A] rounded-[22px] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all">
-                  {t('manageViewBenefits')}
-               </button>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-xl rounded-[36px] p-8 border border-white/20 min-w-[300px] shadow-2xl">
-               <h4 className="font-black text-white text-xs mb-6 uppercase tracking-[0.2em] flex items-center gap-3">
-                  <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_15px_rgba(52,211,153,0.5)]"></span>
-                  {t('manageMemberBenefits')}
-               </h4>
-               <ul className="space-y-5">
-                  {[
-                    { icon: <ShieldCheck size={20} />, text: 'Land Protection Active', color: 'text-emerald-300' },
-                    { icon: <Clock size={20} />, text: 'Real-time Mutation alerts', color: 'text-blue-300' },
-                    { icon: <FileText size={20} />, text: 'Instant 7/12 Downloads', color: 'text-orange-300' }
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-4 text-white/90 font-bold text-sm">
-                       <span className={`w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center ${item.color} shadow-inner`}>{item.icon}</span>
-                       {item.text}
-                    </li>
-                  ))}
-               </ul>
-            </div>
-         </div>
-      </section>
-
-      {/* 3. Improved Quick Actions (Grid) */}
-      <section className="space-y-8 py-4">
-        <div className="flex justify-between items-center px-2">
-           <h3 className="font-black text-gray-900 text-lg uppercase tracking-widest">{t('navTools')}</h3>
-           <button onClick={() => onNavigate('tools')} className="text-[#1E3A8A] text-xs font-black uppercase tracking-widest hover:underline">{t('viewAll')}</button>
-        </div>
-        <div className="grid grid-cols-4 md:grid-cols-5 gap-6 md:gap-12">
-          {QUICK_ACTION_META.map((action) => (
-            <motion.div 
-              key={action.id} 
-              whileHover={{ y: -10 }} 
-              className="group"
-            >
-              <button onClick={() => onSelectAction(action.id)} className="w-full flex flex-col items-center justify-start cursor-pointer">
-                <div className="w-[84px] h-[84px] md:w-[104px] md:h-[104px] bg-white rounded-[32px] flex items-center justify-center mb-5 shadow-[0_12px_45px_rgba(0,0,0,0.06)] border border-gray-100 group-hover:bg-[#1E3A8A] transition-all duration-500 group-hover:shadow-[0_25px_50px_rgba(30,58,138,0.25)]">
-                  <img 
-                    src={action.img} 
-                    className="w-[82%] h-[82%] object-contain transition-all duration-700 group-hover:scale-115 group-hover:brightness-0 group-hover:invert filter drop-shadow-md" 
-                    alt={t(action.labelKey)} 
-                  />
+        {/* 2. HERO: माझी जमीन शोधा */}
+        <motion.section whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+          <button onClick={() => setShow712(true)} className="w-full relative overflow-hidden bg-gradient-to-br from-[#0F1B4D] via-[#1E3A8A] to-[#2563EB] rounded-[28px] p-6 text-left shadow-[0_20px_60px_rgba(30,58,138,0.35)] group">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-400/10 rounded-full -ml-8 -mb-8 blur-xl" />
+            <div className="relative flex items-center justify-between">
+              <div className="space-y-1.5">
+                <div className="inline-flex items-center gap-2 bg-emerald-400/20 border border-emerald-400/30 rounded-full px-3 py-1">
+                  <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                  <span className="text-emerald-300 text-[10px] font-black uppercase tracking-widest">Free • No Login</span>
                 </div>
-                <span className="text-[11px] md:text-sm font-black text-gray-700 text-center leading-tight tracking-tight uppercase group-hover:text-[#1E3A8A] transition-colors">
-                  {t(action.labelKey).split(' ')[0]}
-                </span>
-                <span className="text-[9px] font-black text-gray-400 text-center mt-2 opacity-60 uppercase tracking-widest">
-                   {t(action.labelKey).split(' ').slice(1).join(' ') || 'Access'}
-                </span>
-              </button>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. AI Search Bar (Floating) */}
-      <section className="relative z-10 py-6">
-          <div className="max-w-4xl mx-auto relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/30 to-indigo-600/30 rounded-[36px] blur-2xl opacity-0 group-hover:opacity-100 transition duration-1000"></div>
-            <div className="relative bg-white shadow-[0_25px_60px_rgba(0,0,0,0.12)] rounded-[36px] flex items-center p-3 border border-gray-100 focus-within:border-[#1E3A8A] transition-all h-24">
-              <div className="pl-6 text-[#1E3A8A] opacity-40"><Search size={32} /></div>
-              <input 
-                value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onNavigate('chat')} 
-                placeholder={t('chatPlaceholder')} className="w-full bg-transparent px-6 outline-none text-2xl font-black placeholder:text-gray-300 text-gray-900" 
-              />
-              <div className="pr-3 flex items-center gap-4">
-                <button onClick={handleVoiceSearch} className={`p-5 rounded-2xl transition-all ${isListening ? 'bg-red-50 text-red-500 shadow-inner' : 'text-gray-400 hover:bg-gray-50'}`}>
-                  <Mic size={30} className={isListening ? 'animate-pulse' : ''} />
-                </button>
-                <button onClick={() => onNavigate('chat')} className="px-12 bg-[#1E3A8A] text-white h-[68px] rounded-2xl font-black text-lg shadow-xl shadow-blue-500/30 hover:bg-[#1D4ED8] hover:scale-[1.02] active:scale-[0.98] transition-all">
-                  {lang === 'hi' ? 'खोजें' : lang === 'mr' ? 'शोधा' : 'Search'}
-                </button>
+                <h1 className="text-2xl font-black text-white leading-tight">{L.heroBtn}</h1>
+                <p className="text-white/60 text-xs font-bold">{L.heroSub}</p>
+              </div>
+              <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-3xl group-hover:bg-white/20 transition-all shrink-0 ml-4">
+                🔍
               </div>
             </div>
+          </button>
+        </motion.section>
+
+        {/* 3. 3 PRIMARY CTAs */}
+        <section className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="font-black text-gray-900 text-base">{L.mainActions}</h3>
+              <p className="text-gray-400 text-xs font-bold">{L.mainActionsHint}</p>
+            </div>
+            <button onClick={() => onNavigate('tools')} className="text-[#1E3A8A] text-xs font-black hover:underline">
+              {lang === 'mr' ? 'सर्व पाहा →' : lang === 'hi' ? 'सब देखें →' : 'See all →'}
+            </button>
           </div>
-      </section>
 
-      {/* 5. Marketplace Scroller */}
-      <section className="space-y-8">
-         <h3 className="font-black text-gray-900 text-lg uppercase tracking-widest px-2">Discovery Hub</h3>
-         <div className="flex gap-8 overflow-x-auto pb-10 no-scrollbar -mx-4 px-4">
-            {[
-               { title: 'Offline Records', sub: 'Access docs without internet', img: '/blog/offline_mode.png', color: 'from-gray-800 to-indigo-900', action: () => onNavigate('profile') },
-               { title: 'PM-Kisan Installment', sub: '₹2,000 coming soon', img: '/blog/pm_kisan.png', color: 'from-orange-500 to-red-500' },
-               { title: 'New 7/12 Digital Sign', sub: 'Get officially verified', img: '/blog/digital_712_legal.png', color: 'from-blue-500 to-indigo-600' },
-               { title: 'Market Value 2026', sub: 'Check latest rates', img: '/blog/stamp_duty.png', color: 'from-purple-500 to-pink-600' },
-            ].map((banner, i) => (
-               <div key={i} onClick={() => banner.action && banner.action()} className="min-w-[320px] h-[200px] rounded-[40px] overflow-hidden relative group cursor-pointer shadow-strong transition-all hover:scale-105">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${banner.color} opacity-90 transition-transform group-hover:scale-110 duration-1000`}></div>
-                  <img src={banner.img} className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30" alt="" />
-                  <div className="relative p-8 h-full flex flex-col justify-end text-white">
-                     <h4 className="font-black text-2xl leading-tight mb-2">{banner.title}</h4>
-                     <p className="text-xs font-bold opacity-80 uppercase tracking-widest">{banner.sub}</p>
-                     <div className="absolute top-8 right-8 w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                        <ChevronRight size={24} />
-                     </div>
-                  </div>
-               </div>
+          <div className="grid grid-cols-3 gap-3">
+            {PRIMARY_ACTIONS.map((action, i) => (
+              <motion.button
+                key={action.id}
+                onClick={action.action}
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.96 }}
+                className={`bg-gradient-to-br ${action.color} rounded-[22px] p-5 text-left shadow-xl ${action.shadow} flex flex-col gap-4 cursor-pointer active:opacity-90 transition-all`}
+              >
+                <div className="w-12 h-12 bg-white/15 rounded-2xl flex items-center justify-center">
+                  {action.icon}
+                </div>
+                <div>
+                  <p className="text-white font-black text-sm leading-tight">{action.label}</p>
+                  <p className="text-white/60 text-[10px] font-bold mt-1 uppercase tracking-wider">{action.sub}</p>
+                </div>
+              </motion.button>
             ))}
-         </div>
-      </section>
+          </div>
+        </section>
 
-      {/* 6. Deep Utility Grid */}
-      <section className="space-y-12 pt-10 pb-12">
-        <div className="flex flex-col items-center text-center space-y-4">
-          <span className="inline-block px-6 py-2.5 bg-[#1E3A8A]/5 text-[#1E3A8A] text-[11px] font-black rounded-full uppercase tracking-[0.25em] border border-[#1E3A8A]/10">{t('toolTitleBadge')}</span>
-          <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight leading-none">{t('toolTitleMain')}</h2>
-          <p className="text-gray-400 font-bold max-w-2xl mx-auto">{t('toolsCalculators')}</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10">
-          <LandConverter />
-          <StampDutyCalc lang={lang} />
-          <WeatherCard />
-          <EMICalc lang={lang} />
-        </div>
-      </section>
+        {/* 4. GUEST / LOGIN CARD */}
+        {!isLoggedIn ? (
+          <section className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 rounded-[24px] p-5 flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h4 className="font-black text-gray-900 text-sm">{L.guestTitle}</h4>
+              <p className="text-gray-500 text-xs font-bold">{L.guestSub}</p>
+            </div>
+            <button onClick={() => onNavigate('profile')} className="shrink-0 px-5 py-2.5 bg-[#1E3A8A] text-white rounded-2xl font-black text-xs whitespace-nowrap shadow-md hover:bg-[#1D4ED8] transition-all">
+              {L.loginBtn}
+            </button>
+          </section>
+        ) : (
+          <section className="relative overflow-hidden rounded-[28px] shadow-xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#1E3A8A] to-[#2563EB]" />
+            <div className="relative p-6 flex items-center justify-between gap-6">
+              <div className="space-y-3">
+                <div className="flex gap-6">
+                  <div><span className="block text-white/50 text-[9px] font-black uppercase tracking-widest">Lands</span><span className="text-3xl font-black text-white">04</span></div>
+                  <div><span className="block text-white/50 text-[9px] font-black uppercase tracking-widest">Verified</span><span className="text-3xl font-black text-emerald-400">03</span></div>
+                </div>
+                <button onClick={() => onNavigate('profile')} className="text-white/80 text-xs font-black uppercase tracking-widest hover:text-white">{L.addLand}</button>
+              </div>
+              <button onClick={() => onNavigate('profile')} className="shrink-0 px-6 py-3 bg-white text-[#1E3A8A] rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all">
+                {t('manageViewBenefits')}
+              </button>
+            </div>
+          </section>
+        )}
 
-      {/* 7. Community Trust & Impact (Testimonials) */}
-      <section className="space-y-10 py-12 border-t border-gray-100">
-         <div className="flex justify-between items-end px-2">
-            <div className="space-y-2">
-               <span className="text-[10px] font-black text-[#1E3A8A] uppercase tracking-widest">{t('successStories')}</span>
-               <h3 className="text-3xl font-black text-gray-900 tracking-tight">{t('trustedByThousands')}</h3>
-            </div>
-            <div className="flex gap-2 mb-1">
-               <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><Users size={20} /></div>
-               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><Star size={20} /></div>
-            </div>
-         </div>
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* 5. DISCOVERY HUB — 4 cards with benefit text */}
+        <section className="space-y-4">
+          <div>
+            <h3 className="font-black text-gray-900 text-base">{L.discoveryTitle}</h3>
+            <p className="text-gray-400 text-xs font-bold">{lang === 'mr' ? 'एक टॅपमध्ये जाणून घ्या' : lang === 'hi' ? 'एक टैप में जानें' : 'Know in one tap'}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            {DISCOVERY_CARDS.map((card, i) => (
+              <motion.div key={i} whileHover={{ y: -3 }} whileTap={{ scale: 0.97 }}
+                onClick={card.action}
+                className={`bg-gradient-to-br ${card.color} rounded-[20px] p-5 cursor-pointer relative overflow-hidden shadow-lg`}>
+                <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full -mr-4 -mt-4 blur-xl" />
+                <div className="relative space-y-3">
+                  <span className="text-3xl">{card.emoji}</span>
+                  <div>
+                    <p className="text-white font-black text-sm leading-snug">{card.title}</p>
+                    <p className="text-white/60 text-[10px] font-bold mt-1">{card.benefit}</p>
+                  </div>
+                  <ChevronRight size={16} className="text-white/40" />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* 6. Quick Tools Row */}
+        <section className="space-y-4">
+          <h3 className="font-black text-gray-900 text-base">{lang === 'mr' ? 'साधने' : lang === 'hi' ? 'उपकरण' : 'Tools'}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <StampDutyCalc lang={lang} />
+            <EMICalc lang={lang} />
+          </div>
+        </section>
+
+        {/* 7. Testimonials */}
+        <section className="space-y-5 pt-2 border-t border-gray-100">
+          <div>
+            <span className="text-[10px] font-black text-[#1E3A8A] uppercase tracking-widest">{t('successStories')}</span>
+            <h3 className="text-xl font-black text-gray-900 mt-1">{t('trustedByThousands')}</h3>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
             {[
-               { name: 'Suresh More', location: 'Satara', text: t('testimonial1'), rating: 5 },
-               { name: 'Amol Deshmukh', location: 'Nagpur', text: t('testimonial2'), rating: 5 },
-               { name: 'Vithal Patil', location: 'Nashik', text: t('testimonial3'), rating: 5 }
+              { name: 'Suresh More', location: 'Satara', text: t('testimonial1') },
+              { name: 'Vithal Patil', location: 'Nashik', text: t('testimonial3') },
             ].map((item, i) => (
-               <div key={i} className="bg-white p-8 rounded-[36px] shadow-[0_15px_40px_rgba(0,0,0,0.05)] border border-gray-50 flex flex-col justify-between hover:shadow-xl transition-all">
-                  <div className="space-y-4">
-                     <div className="flex gap-1 text-emerald-500">
-                        {[...Array(item.rating)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
-                     </div>
-                     <p className="text-gray-600 italic font-bold">"{item.text}"</p>
-                  </div>
-                  <div className="flex items-center gap-4 mt-8 pt-6 border-t border-gray-50">
-                     <div className="w-12 h-12 bg-[#1E3A8A]/10 rounded-full flex items-center justify-center font-black text-[#1E3A8A]">{item.name[0]}</div>
-                     <div>
-                        <h5 className="font-black text-gray-900">{item.name}</h5>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{item.location}</p>
-                     </div>
-                  </div>
-               </div>
+              <div key={i} className="bg-white p-6 rounded-[24px] shadow-sm border border-gray-50">
+                <div className="flex gap-1 text-emerald-500 mb-3">{[...Array(5)].map((_, j) => <Star key={j} size={12} fill="currentColor" />)}</div>
+                <p className="text-gray-600 font-bold text-sm">"{item.text}"</p>
+                <div className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-50">
+                  <div className="w-9 h-9 bg-[#1E3A8A]/10 rounded-full flex items-center justify-center font-black text-[#1E3A8A] text-sm">{item.name[0]}</div>
+                  <div><p className="font-black text-gray-900 text-sm">{item.name}</p><p className="text-[10px] font-bold text-gray-400">{item.location}</p></div>
+                </div>
+              </div>
             ))}
-         </div>
-      </section>
+          </div>
+        </section>
 
-      {/* 8. Help & SOS CTA (Airtel "Broadband Support" style banner) */}
-      <section className="bg-[#1E3A8A] rounded-[40px] p-8 md:p-12 relative overflow-hidden group">
-         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
-         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-            <div className="space-y-4 text-center md:text-left">
-               <h3 className="text-3xl font-black text-white tracking-tight">{t('needExpertHelp')}</h3>
-               <p className="text-white/70 font-bold max-w-md">{t('expertHelpDesc')}</p>
+        {/* 8. AI Help CTA */}
+        <section className="bg-[#1E3A8A] rounded-[28px] p-6 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl" />
+          <div className="relative flex flex-col sm:flex-row items-center justify-between gap-5">
+            <div className="space-y-1 text-center sm:text-left">
+              <h3 className="text-xl font-black text-white">{t('needExpertHelp')}</h3>
+              <p className="text-white/60 font-bold text-sm max-w-xs">{t('expertHelpDesc')}</p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-               <button className="px-10 py-5 bg-white text-[#1E3A8A] rounded-[24px] font-black uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-3">
-                  <PhoneCall size={20} /> {t('callNow')}
-               </button>
-               <button onClick={() => onNavigate('chat')} className="px-10 py-5 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-[24px] font-black uppercase tracking-widest hover:bg-white/20 transition-all flex items-center justify-center gap-3">
-                  <MessageCircle size={20} /> {t('askAI')}
-               </button>
+            <div className="flex gap-3 shrink-0">
+              <button className="px-6 py-3 bg-white text-[#1E3A8A] rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all flex items-center gap-2"><PhoneCall size={16} />{t('callNow')}</button>
+              <button onClick={() => onNavigate('chat')} className="px-6 py-3 bg-white/10 text-white rounded-2xl font-black text-sm border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2"><MessageCircle size={16} />{t('askAI')}</button>
             </div>
-         </div>
-      </section>
-    </div>
+          </div>
+        </section>
+
+      </div>
+    </>
   )
 }
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react'
+import React, { useState, useEffect, useRef, createContext, useContext, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Mic, FileText, RefreshCw, Handshake, Users, Map,
@@ -6,44 +6,276 @@ import {
   ChevronRight, Download, Building2, MapPin,
   Bell, User as UserIcon, Layout, HelpCircle, Clock,
   Shield, BookOpen, Phone, Mail, ExternalLink, Menu, X, MessageCircle,
-  Sun, CloudRain, Calendar, Calculator, Link2
+  Sun, CloudRain, Calendar, Calculator, Link2, Wrench, Share2, ShieldCheck, Navigation, CloudSun,
+  Star, Smartphone, ClipboardCheck, PhoneCall
 } from 'lucide-react'
 import translations from './i18n'
-
 import { landKnowledge as LAND_KNOWLEDGE } from './landKnowledge'
+import { LangProvider, useLang } from './LangContext'
+import StampDutyCalc from './StampDutyCalc'
+import FAQSection from './FAQSection'
+import OfficeLocator from './OfficeLocator'
+import SchemeFinder from './SchemeFinder'
+import Glossary from './Glossary'
+import EMICalc from './EMICalc'
+import DocTemplates from './DocTemplates'
+import ReadyReckoner from './ReadyReckoner'
+import DocAnalyzer from './DocAnalyzer'
+import CaseTracker from './CaseTracker'
+import CommunityForum from './CommunityForum'
+import FarmerProfile from './FarmerProfile'
 
-// =====================================================
-// 1. LANGUAGE CONTEXT
-// =====================================================
-const LangContext = createContext()
-const useLang = () => useContext(LangContext)
+// 1. ERASED (MOVED TO LangContext.jsx)
 
-const LangProvider = ({ children }) => {
-  const [lang, setLang] = useState('mr')
-  const t = (key) => {
-    try {
-      if (!translations[lang]) return translations['en']?.[key] || key
-      return translations[lang][key] || translations['en']?.[key] || key
-    } catch (e) {
-      return key
-    }
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
   }
-  return (
-    <LangContext.Provider value={{ lang, setLang, t }}>
-      {children}
-    </LangContext.Provider>
-  )
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-20 text-center bg-red-50 min-h-screen flex items-center justify-center">
+          <div className="max-w-xl p-10 bg-white rounded-[32px] shadow-strong border-4 border-red-500">
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">CRASH DETECTED</h1>
+            <p className="text-red-600 font-mono text-lg bg-red-50 p-6 rounded-xl mb-6 border border-red-200">
+              {this.state.error?.toString()}
+            </p>
+            <button onClick={() => window.location.reload()} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-bold text-xl shadow-lg hover:bg-red-700 transition-all">Reload</button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 // =====================================================
-// 2. CONSTANTS
+// 3. CONSTANTS
 // =====================================================
 const QUICK_ACTION_META = [
-  { id: '712', labelKey: 'qa712Label', subKey: 'qa712Sub', icon: <FileText size={36} />, color: 'bg-blue-50 text-blue-600 border-blue-100' },
-  { id: 'ferfar', labelKey: 'qaFerfarLabel', subKey: 'qaFerfarSub', icon: <RefreshCw size={36} />, color: 'bg-green-50 text-green-600 border-green-100' },
-  { id: 'transfer', labelKey: 'qaTransferLabel', subKey: 'qaTransferSub', icon: <Handshake size={36} />, color: 'bg-orange-50 text-orange-600 border-orange-100' },
-  { id: 'waras', labelKey: 'qaWarasLabel', subKey: 'qaWarasSub', icon: <Users size={36} />, color: 'bg-purple-50 text-purple-600 border-purple-100' },
-  { id: 'map', labelKey: 'qaMapLabel', subKey: 'qaMapSub', icon: <Map size={36} />, color: 'bg-cyan-50 text-cyan-600 border-cyan-100' },
+  { id: 'quiz', labelKey: 'schemeFinder', img: 'https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Clipboard/3D/clipboard_3d.png' },
+  { id: '712', labelKey: 'qa712Label', img: '/icons/icon_property.png' },
+  { id: 'ferfar', labelKey: 'qaFerfarLabel', img: '/icons/icon_mutation.png' },
+  { id: 'transfer', labelKey: 'qaTransferLabel', img: '/icons/icon_transfer.png' },
+  { id: 'waras', labelKey: 'qaWarasLabel', img: '/icons/icon_heir.png' },
+]
+
+const BLOG_POSTS = [
+  {
+    id: 1,
+    title: {
+      mr: '७/१२ उतारा: एक सविस्तर मार्गदर्शक',
+      hi: '7/12 उतारा: एक विस्तृत मार्गदर्शक',
+      en: '7/12 Extract: A Comprehensive Guide'
+    },
+    date: '22 Mar 2026',
+    image: '/blog/712_guide.png',
+    contentKey: 'blogPost1Content',
+    excerpt: {
+      mr: '७/१२ उतारा म्हणजे काय आणि तो का महत्त्वाचा आहे ते जाणून घ्या.',
+      hi: 'जानें कि 7/12 उतारा क्या है और यह क्यों महत्वपूर्ण है।',
+      en: 'Learn what 7/12 extract is and why it is crucial for land owners.'
+    }
+  },
+  {
+    id: 2,
+    title: {
+      mr: 'नवीन जमीन कायदे: २०२६ चे अपडेट्स',
+      hi: 'नए भूमि कानून: 2026 के अपडेट',
+      en: 'New Land Laws: 2026 Updates'
+    },
+    date: '20 Mar 2026',
+    image: '/blog/land_laws.png',
+    contentKey: 'blogPost2Content',
+    excerpt: {
+      mr: 'या वर्षीच्या जमीन महसूल कायद्यातील महत्त्वाच्या बदलांची माहिती.',
+      hi: 'इस वर्ष के भूमि राजस्व कानूनों में महत्वपूर्ण बदलावों की जानकारी।',
+      en: 'Information about key changes in land revenue laws this year.'
+    }
+  },
+  {
+    id: 3,
+    title: {
+      mr: 'शेतकऱ्यांसाठी डिजिटल बँकिंगचे फायदे',
+      hi: 'किसानों के लिए डिजिटल बैंकिंग के लाभ',
+      en: 'Benefits of Digital Banking for Farmers'
+    },
+    date: '18 Mar 2026',
+    image: '/blog/farmer_support.png',
+    contentKey: 'blogPost3Content',
+    excerpt: {
+      mr: 'डिजिटल पद्धतीने व्यवहार करून वेळ आणि मजुरी कशी वाचवाल.',
+      hi: 'डिजिटल लेनदेन करके समय और मजदूरी कैसे बचाएं।',
+      en: 'How to save time and labor costs by using digital transactions.'
+    }
+  },
+  {
+    id: 4,
+    title: {
+      mr: 'प्रॉपर्टी म्युटेशन ऑनलाइन कसे करावे: संपूर्ण स्टेप-बाय-स्टेप गाइड',
+      hi: 'प्रॉपर्टी म्यूटेशन ऑनलाइन कैसे करें: पूरी स्टेप-बाय-स्टेप गाइड',
+      en: 'How to Do Property Mutation Online: Complete Step-by-Step Guide'
+    },
+    date: '16 Mar 2026',
+    image: '/blog/mutation_online.png',
+    contentKey: 'blogPost4Content',
+    excerpt: {
+      mr: 'ई-हक्क प्रणालीद्वारे घरबसल्या फेरफार कसा करायचा ते शिका.',
+      hi: 'ई-हक्क प्रणाली से घर बैठे फेरफार कैसे करें, सीखें।',
+      en: 'Learn how to complete property mutation from home using the E-Haqq system.'
+    }
+  },
+  {
+    id: 5,
+    title: {
+      mr: 'डिजिटल ७/१२ उतारा कायदेशीर आहे का? सत्य जाणून घ्या',
+      hi: 'क्या डिजिटल 7/12 उतारा कानूनी रूप से मान्य है? सच्चाई जानें',
+      en: 'Is Digital 7/12 Extract Legally Valid? Know the Truth'
+    },
+    date: '14 Mar 2026',
+    image: '/blog/digital_712_legal.png',
+    contentKey: 'blogPost5Content',
+    excerpt: {
+      mr: 'डिजिटल स्वाक्षरी असलेला ७/१२ बँक, कोर्ट आणि शासकीय कामांसाठी चालतो का?',
+      hi: 'डिजिटल हस्ताक्षर वाला 7/12 बैंक, कोर्ट और सरकारी कामों में चलता है या नहीं?',
+      en: 'Does digitally signed 7/12 work for banks, courts, and government offices?'
+    }
+  },
+  {
+    id: 6,
+    title: {
+      mr: 'जमीन फसवणूक कशी ओळखावी आणि टाळावी: ५ धोक्याचे संकेत',
+      hi: 'जमीन धोखाधड़ी कैसे पहचानें और बचें: 5 खतरे के संकेत',
+      en: 'How to Spot and Avoid Land Fraud: 5 Warning Signs'
+    },
+    date: '12 Mar 2026',
+    image: '/blog/land_fraud.png',
+    contentKey: 'blogPost6Content',
+    excerpt: {
+      mr: 'बनावट कागदपत्रे, बेकायदेशीर विक्री आणि दुबार विक्री कशी ओळखावी.',
+      hi: 'नकली दस्तावेज़, अवैध बिक्री और दोहरी बिक्री को कैसे पहचानें।',
+      en: 'How to identify fake documents, illegal sales, and double-selling scams.'
+    }
+  },
+  {
+    id: 7,
+    title: {
+      mr: 'PM-KISAN योजना नोंदणी: पात्रता, कागदपत्रे आणि स्टेटस चेक',
+      hi: 'PM-KISAN योजना रजिस्ट्रेशन: पात्रता, दस्तावेज़ और स्टेटस चेक',
+      en: 'PM-KISAN Registration: Eligibility, Documents & Status Check'
+    },
+    date: '10 Mar 2026',
+    image: '/blog/pm_kisan.png',
+    contentKey: 'blogPost7Content',
+    excerpt: {
+      mr: 'पीएम-किसान योजनेचे ₹६,००० वार्षिक अनुदान कसे मिळवायचे ते शिका.',
+      hi: 'पीएम-किसान योजना के ₹6,000 वार्षिक अनुदान कैसे प्राप्त करें, सीखें।',
+      en: 'Learn how to get ₹6,000 annual benefit under PM-KISAN scheme.'
+    }
+  },
+  {
+    id: 8,
+    title: {
+      mr: 'जमीन खरेदी करताना मुद्रांक शुल्क कसे वाचवायचे: कायदेशीर मार्ग',
+      hi: 'जमीन खरीदते समय स्टाम्प ड्यूटी कैसे बचाएं: कानूनी तरीके',
+      en: 'How to Save Stamp Duty When Buying Land: Legal Methods'
+    },
+    date: '8 Mar 2026',
+    image: '/blog/stamp_duty.png',
+    contentKey: 'blogPost8Content',
+    excerpt: {
+      mr: 'मुद्रांक शुल्कावर कायदेशीररित्या बचत करण्याचे ५ मार्ग.',
+      hi: 'स्टाम्प ड्यूटी पर कानूनी रूप से बचत करने के 5 तरीके।',
+      en: '5 legal ways to reduce stamp duty costs on property purchase.'
+    }
+  },
+  {
+    id: 9,
+    title: {
+      mr: 'शेतजमीन कर्जासाठी कोणती कागदपत्रे लागतात? बँक लोन गाइड',
+      hi: 'खेती की जमीन पर लोन के लिए कौन से दस्तावेज़ चाहिए? बैंक लोन गाइड',
+      en: 'Documents Required for Agricultural Land Loan: Bank Loan Guide'
+    },
+    date: '6 Mar 2026',
+    image: '/blog/land_loan.png',
+    contentKey: 'blogPost9Content',
+    excerpt: {
+      mr: 'शेतजमिनीवर बँक कर्ज मिळवण्यासाठी आवश्यक कागदपत्रे आणि प्रक्रिया.',
+      hi: 'खेती की जमीन पर बैंक लोन प्राप्त करने के लिए जरूरी दस्तावेज़ और प्रक्रिया।',
+      en: 'Essential documents and process for getting a bank loan on agricultural land.'
+    }
+  },
+  {
+    id: 10,
+    title: {
+      mr: 'वारसा हक्काने मिळालेली जमीन कशी वाटावी: वाटप प्रक्रिया',
+      hi: 'विरासत में मिली जमीन का बंटवारा कैसे करें: वाटप प्रक्रिया',
+      en: 'How to Partition Inherited Land: Complete Legal Process'
+    },
+    date: '4 Mar 2026',
+    image: '/blog/partition.png',
+    contentKey: 'blogPost10Content',
+    excerpt: {
+      mr: 'कुटुंबातील जमीन वाटपाची प्रक्रिया, कागदपत्रे आणि टिप्स.',
+      hi: 'परिवार में जमीन बंटवारे की प्रक्रिया, दस्तावेज़ और टिप्स।',
+      en: 'Process, documents, and tips for partitioning family-owned property.'
+    }
+  },
+  {
+    id: 11,
+    title: {
+      mr: 'पीक विमा क्लेम कसा करावा? PMFBY ऑनलाइन प्रक्रिया',
+      hi: 'फसल बीमा क्लेम कैसे करें? PMFBY ऑनलाइन प्रक्रिया',
+      en: 'How to File Crop Insurance Claim? PMFBY Online Process'
+    },
+    date: '2 Mar 2026',
+    image: '/blog/crop_insurance.png',
+    contentKey: 'blogPost11Content',
+    excerpt: {
+      mr: 'नैसर्गिक आपत्तीमुळे पीक नुकसान झाल्यास विमा क्लेम कसा करावा.',
+      hi: 'प्राकृतिक आपदा से फसल नुकसान होने पर बीमा क्लेम कैसे करें।',
+      en: 'Step-by-step guide to filing crop insurance claims after natural disasters.'
+    }
+  },
+  {
+    id: 12,
+    title: {
+      mr: 'शेतजमीन NA करण्याची प्रक्रिया: बिगरशेती परवानगी गाइड',
+      hi: 'खेती की जमीन NA करने की प्रक्रिया: गैर-कृषि अनुमति गाइड',
+      en: 'How to Convert Agricultural Land to NA: Non-Agricultural Permission Guide'
+    },
+    date: '28 Feb 2026',
+    image: '/blog/na_conversion.png',
+    contentKey: 'blogPost12Content',
+    excerpt: {
+      mr: 'शेतजमीन NA (Non-Agricultural) करण्यासाठी संपूर्ण प्रक्रिया.',
+      hi: 'खेती की जमीन को NA (Non-Agricultural) में बदलने की पूरी प्रक्रिया।',
+      en: 'Complete process for converting agricultural land to non-agricultural use.'
+    }
+  },
+  {
+    id: 13,
+    title: {
+      mr: 'सरकारी जमीन ई-लिलाव: ऑनलाइन बोली कशी लावावी',
+      hi: 'सरकारी जमीन ई-नीलामी: ऑनलाइन बोली कैसे लगाएं',
+      en: 'Government Land E-Auction: How to Bid Online'
+    },
+    date: '26 Feb 2026',
+    image: '/blog/e_auction.png',
+    contentKey: 'blogPost13Content',
+    excerpt: {
+      mr: 'सरकारी जमिनीच्या ई-लिलावात सहभागी होण्याची संपूर्ण माहिती.',
+      hi: 'सरकारी जमीन की ई-नीलामी में भाग लेने की पूरी जानकारी।',
+      en: 'Complete guide to participating in government land e-auctions.'
+    }
+  }
 ]
 
 const LANGUAGES = [
@@ -74,12 +306,14 @@ const Button = ({ children, onClick, variant = 'primary', className = '', type =
 const Navbar = ({ onNavigate }) => {
   const { lang, setLang, t } = useLang()
   const [isOpen, setIsOpen] = useState(false)
+  const [showNotif, setShowNotif] = useState(false)
 
   const menuItems = [
     { id: 'home', label: t('navHome') },
     { id: 'chat', label: t('navAskAI') },
     { id: 'docs', label: t('navDocs') },
-    { id: 'offices', label: 'Offices' }, // Could add to i18n
+    { id: 'tools', label: t('navTools') },
+    { id: 'blog', label: t('navBlog') },
     { id: 'help', label: t('navHelp') },
   ]
 
@@ -107,7 +341,43 @@ const Navbar = ({ onNavigate }) => {
         </div>
 
         {/* Right Side */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4 relative">
+          <button onClick={() => setShowNotif(!showNotif)} className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 text-text-sub hover:bg-bg-primary rounded-xl transition-colors cursor-pointer mr-1 border border-transparent hover:border-border-gray">
+            <Bell size={22} className={showNotif ? 'text-[#1E3A8A]' : ''} />
+            <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full animate-pulse shadow-sm"></span>
+          </button>
+
+          <AnimatePresence>
+            {showNotif && (
+              <motion.div initial={{ opacity: 0, y: 15, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.1 } }} 
+                className="absolute top-16 right-0 md:right-16 w-[320px] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.15)] border border-border-gray rounded-[24px] overflow-hidden origin-top-right z-50 py-1">
+                <div className="px-5 py-4 border-b border-border-gray flex justify-between items-center bg-gray-50/50">
+                  <span className="font-extrabold text-text-main text-[16px]">{t('notifTitle')}</span>
+                  <span className="bg-[#1E3A8A] text-white text-[10px] font-black px-2 py-1 rounded-md uppercase tracking-wider">2 {t('notifNew')}</span>
+                </div>
+                <div className="max-h-[320px] overflow-y-auto">
+                  <div className="p-5 border-b border-border-gray hover:bg-blue-50/50 cursor-pointer transition-colors relative group">
+                    <span className="absolute top-6 left-4 w-2 h-2 bg-blue-500 rounded-full group-hover:scale-125 transition-transform"></span>
+                    <p className="font-bold text-sm text-text-main pl-5 leading-tight">{t('notif712Update')}</p>
+                    <span className="text-xs font-semibold text-text-sub pl-5 mt-2 block opacity-70">12 mins ago</span>
+                  </div>
+                  <div className="p-5 hover:bg-blue-50/50 cursor-pointer transition-colors relative group">
+                    <span className="absolute top-6 left-4 w-2 h-2 bg-blue-500 rounded-full group-hover:scale-125 transition-transform"></span>
+                    <p className="font-bold text-sm text-text-main pl-5 leading-tight">{t('notifCropInsu')}</p>
+                    <span className="text-xs font-semibold text-text-sub pl-5 mt-2 block opacity-70">2 hours ago</span>
+                  </div>
+                </div>
+                <div className="p-3 bg-gray-50 border-t border-border-gray text-center">
+                  <button className="text-xs font-bold text-[#1E3A8A] hover:underline cursor-pointer">{t('notifViewAll')}</button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <button onClick={() => onNavigate('profile')} title={lang === 'mr' ? 'डॅशबोर्ड' : 'Profile'} className="p-2 md:p-2.5 text-text-sub hover:bg-bg-primary rounded-xl transition-colors cursor-pointer border border-transparent hover:border-border-gray">
+            <UserIcon size={22} />
+          </button>
+
           <div className="flex bg-bg-primary p-1 rounded-xl border border-border-gray">
             {LANGUAGES.map(l => (
               <button
@@ -282,22 +552,30 @@ const LandConverter = () => {
   ]
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-soft border border-border-gray space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-          <Calculator size={24} />
+    <div className="bg-white p-6 md:p-10 rounded-[40px] shadow-[0_15px_50px_rgba(0,0,0,0.06)] border border-gray-100/80 space-y-8 flex flex-col h-full transform transition-all hover:shadow-[0_20px_60px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-sm">
+            <Calculator size={30} strokeWidth={2.5} />
+          </div>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600/70 mb-1 block">Converter</span>
+            <h3 className="text-2xl font-black text-gray-900 leading-tight">{t('calcTitle')}</h3>
+          </div>
         </div>
-        <h3 className="text-xl font-bold text-text-main">{t('calcTitle')}</h3>
       </div>
-      <div className="space-y-4">
-        <div className="flex gap-2">
-          <input 
-            type="number" value={val} onChange={(e) => setVal(parseFloat(e.target.value) || 0)} 
-            className="flex-1 bg-bg-primary border border-border-gray rounded-xl px-4 h-14 outline-none focus:border-[#1E3A8A] font-bold text-lg" 
-          />
+
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex-1 relative">
+            <input 
+              type="number" value={val} onChange={(e) => setVal(parseFloat(e.target.value) || 0)} 
+              className="w-full bg-[#F8FAFC] border-2 border-gray-100 rounded-[22px] px-6 h-16 outline-none focus:border-[#1E3A8A] focus:bg-white font-black text-2xl text-[#1E3A8A] transition-all" 
+            />
+          </div>
           <select 
             value={unit} onChange={(e) => setUnit(e.target.value)}
-            className="bg-bg-primary border border-border-gray rounded-xl px-2 h-14 outline-none focus:border-[#1E3A8A] font-bold text-sm md:text-base cursor-pointer"
+            className="sm:w-40 bg-[#1E3A8A] text-white border-none rounded-[22px] px-6 h-16 outline-none font-black text-sm cursor-pointer shadow-lg hover:bg-[#1D4ED8] transition-all appearance-none text-center"
           >
             <option value="hec">{t('unitHectare')}</option>
             <option value="acre">{t('unitAcre')}</option>
@@ -305,11 +583,13 @@ const LandConverter = () => {
             <option value="sqm">{t('unitSqM')}</option>
           </select>
         </div>
-        <div className="grid grid-cols-2 gap-3 pt-2">
+
+        <div className="grid grid-cols-2 gap-4 pt-2 border-t-2 border-dashed border-gray-100 mt-6 pt-6">
           {results.map((r, i) => (
-            <div key={i} className="bg-bg-primary/50 p-4 rounded-2xl border border-blue-50 transition-all hover:bg-blue-50/30">
-              <span className="block text-[10px] uppercase font-bold text-text-sub/60 mb-1">{r.label}</span>
-              <span className="block text-xl font-black text-[#1E3A8A]">{r.val}</span>
+            <div key={i} className="bg-white p-5 rounded-[24px] border border-gray-100 shadow-sm hover:border-[#1E3A8A]/30 transition-all group overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#1E3A8A] transform -translate-x-full group-hover:translate-x-0 transition-transform"></div>
+              <span className="block text-[11px] uppercase font-black text-gray-400 tracking-wider mb-2">{r.label}</span>
+              <span className="block text-2xl font-black text-gray-900 group-hover:text-[#1E3A8A] transition-colors">{r.val}</span>
             </div>
           ))}
         </div>
@@ -362,35 +642,71 @@ const WeatherCard = () => {
   }
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-soft border border-border-gray space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center">
-          <Sun size={24} />
+    <div className="bg-white p-6 md:p-10 rounded-[40px] shadow-[0_15px_50px_rgba(0,0,0,0.06)] border border-gray-100/80 space-y-8 flex flex-col h-full transform transition-all hover:shadow-[0_20px_60px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-orange-50 text-orange-600 rounded-2xl flex items-center justify-center shadow-sm">
+            <Sun size={30} strokeWidth={2.5} />
+          </div>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-600/70 mb-1 block">Live Update</span>
+            <h3 className="text-2xl font-black text-gray-900 leading-tight">{t('weatherTitle')}</h3>
+          </div>
         </div>
-        <h3 className="text-xl font-bold text-text-main">{t('weatherTitle')}</h3>
       </div>
-      <div className="min-h-[140px] flex flex-col justify-center">
+
+      <div className="flex-1 flex flex-col justify-center py-4">
         {!data && !loading && !error && (
-          <div className="space-y-4">
-            <p className="text-text-sub font-semibold text-sm">{t('weatherDesc')}</p>
-            <Button onClick={getWeather} className="w-full">{t('weatherBtn')}</Button>
+          <div className="space-y-6">
+            <p className="text-gray-500 font-bold text-base leading-relaxed">{t('weatherDesc')}</p>
+            <button 
+              onClick={getWeather} 
+              className="w-full bg-orange-500 text-white rounded-[22px] h-16 font-black text-lg shadow-lg shadow-orange-500/20 hover:bg-orange-600 transition-all cursor-pointer flex items-center justify-center gap-3 group"
+            >
+              <Navigation size={22} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              {t('weatherBtn')}
+            </button>
           </div>
         )}
-        {loading && <p className="text-center font-bold text-text-sub animate-pulse">{t('weatherLoading')}</p>}
-        {error && <p className="text-center font-bold text-red-500 text-sm bg-red-50 p-3 rounded-xl border border-red-100">{error}</p>}
+
+        {loading && (
+          <div className="flex flex-col items-center gap-4 py-10">
+            <div className="w-12 h-12 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin"></div>
+            <p className="font-black text-gray-400 uppercase tracking-widest text-xs">{t('weatherLoading')}</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="p-6 bg-red-50 rounded-[24px] border border-red-100 text-center space-y-4">
+             <div className="w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto"><AlertCircle size={24} /></div>
+             <p className="font-bold text-red-600 leading-tight">{error}</p>
+             <button onClick={getWeather} className="text-sm font-black text-red-500 underline underline-offset-4 cursor-pointer">Retry</button>
+          </div>
+        )}
+
         {data && (
-          <div className="space-y-5 animate-fade-in-up">
-            <div className="flex justify-between items-center">
-              <span className="text-5xl font-black text-[#1E3A8A]">{data.temp}°C</span>
-              <div className="text-right">
-                <span className="block text-[10px] font-bold text-text-sub uppercase tracking-wider">{t('weatherRainProb')}</span>
-                <span className={`text-2xl font-black ${data.rainProb > 30 ? 'text-green-600' : 'text-text-main'}`}>{data.rainProb}%</span>
+          <div className="space-y-8 animate-fade-in-up">
+            <div className="flex justify-between items-end">
+              <div className="space-y-1">
+                <span className="block text-[11px] font-black text-gray-400 uppercase tracking-widest">Temperature</span>
+                <span className="text-7xl font-black text-[#1E3A8A] tracking-tighter">{data.temp}<span className="text-3xl font-bold ml-1">°C</span></span>
+              </div>
+              <div className="text-right pb-2">
+                <div className="bg-blue-50 px-4 py-2 rounded-2xl border border-blue-100 inline-block">
+                  <span className="block text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1">{t('weatherRainProb')}</span>
+                  <span className="text-2xl font-black text-blue-800">{data.rainProb}%</span>
+                </div>
               </div>
             </div>
-            <div className={`p-4 rounded-2xl text-center font-bold text-sm ${data.rainProb > 30 ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-bg-primary text-text-main border border-border-gray'}`}>
-              {data.rainProb > 30 ? t('weatherRain') : t('weatherClear')}
+
+            <div className={`p-6 rounded-[28px] text-center flex items-center justify-center gap-4 border-2 transition-all ${data.rainProb > 30 ? 'bg-blue-50 border-blue-200 text-blue-800 shadow-lg shadow-blue-500/10' : 'bg-emerald-50 border-emerald-200 text-emerald-800 shadow-lg shadow-emerald-500/10'}`}>
+              {data.rainProb > 30 ? <CloudRain size={28} /> : <CloudSun size={28} />}
+              <span className="text-xl font-black">{data.rainProb > 30 ? t('weatherRain') : t('weatherClear')}</span>
             </div>
-            <p className="text-[10px] text-center text-text-sub font-bold opacity-60 uppercase">{t('weatherLocation')}: {data.lat.toFixed(2)}, {data.lon.toFixed(2)}</p>
+
+            <div className="flex items-center gap-3 justify-center text-[11px] font-black text-gray-400 uppercase tracking-widest opacity-60">
+               <MapPin size={14} /> {t('weatherLocation')}: {data.lat.toFixed(2)}, {data.lon.toFixed(2)}
+            </div>
           </div>
         )}
       </div>
@@ -407,21 +723,32 @@ const OfficialLinks = () => {
   ]
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-soft border border-border-gray space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-green-50 text-green-600 rounded-xl flex items-center justify-center">
-          <Link2 size={24} />
+    <div className="bg-white p-6 md:p-10 rounded-[40px] shadow-[0_15px_50px_rgba(0,0,0,0.06)] border border-gray-100/80 space-y-8 flex flex-col h-full transform transition-all hover:shadow-[0_20px_60px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-sm">
+            <Link2 size={30} strokeWidth={2.5} />
+          </div>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600/70 mb-1 block">Quick Access</span>
+            <h3 className="text-2xl font-black text-gray-900 leading-tight">{t('linksTitle')}</h3>
+          </div>
         </div>
-        <h3 className="text-xl font-bold text-text-main">{t('linksTitle')}</h3>
       </div>
-      <div className="space-y-3">
+
+      <div className="space-y-4 pt-2">
         {links.map((link, i) => (
           <a 
             key={i} href={link.url} target="_blank" rel="noopener noreferrer"
-            className="flex items-center justify-between p-4 bg-bg-primary rounded-xl border border-border-gray hover:border-[#1E3A8A] hover:bg-white transition-all group"
+            className="flex items-center justify-between p-5 bg-[#F8FAFC] rounded-[24px] border border-gray-100 hover:border-[#1E3A8A] hover:bg-white hover:shadow-md transition-all group lg:p-6"
           >
-            <span className="font-bold text-text-main group-hover:text-[#1E3A8A]">{link.label}</span>
-            <ExternalLink size={18} className="text-text-sub group-hover:text-[#1E3A8A]" />
+            <div className="flex items-center gap-4">
+               <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-[#1E3A8A] shadow-sm group-hover:bg-[#1E3A8A] group-hover:text-white transition-colors">
+                  <ExternalLink size={18} />
+               </div>
+               <span className="font-black text-gray-800 group-hover:text-[#1E3A8A] transition-colors">{link.label}</span>
+            </div>
+            <ChevronRight size={20} className="text-gray-300 group-hover:text-[#1E3A8A] group-hover:translate-x-1 transition-all" />
           </a>
         ))}
       </div>
@@ -447,120 +774,539 @@ const PanchangCard = () => {
   }, [lang])
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-[28px] shadow-soft border border-border-gray space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center">
-          <Calendar size={24} />
+    <div className="bg-white p-6 md:p-10 rounded-[40px] shadow-[0_15px_50px_rgba(0,0,0,0.06)] border border-gray-100/80 space-y-8 flex flex-col h-full transform transition-all hover:shadow-[0_20px_60px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center shadow-sm">
+            <Calendar size={30} strokeWidth={2.5} />
+          </div>
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-600/70 mb-1 block">Tithi & Date</span>
+            <h3 className="text-2xl font-black text-gray-900 leading-tight">{t('panchangTitle')}</h3>
+          </div>
         </div>
-        <h3 className="text-xl font-bold text-text-main">{t('panchangTitle')}</h3>
       </div>
-      <div className="py-2 text-center space-y-2">
-        <span className="block text-2xl font-black text-[#1E3A8A]">{saka || t('panchangLoading')}</span>
-        <span className="block text-lg font-bold text-text-main">{std}</span>
+
+      <div className="flex-1 flex flex-col justify-center text-center space-y-4">
+        <div className="relative inline-block mx-auto bg-purple-50 px-8 py-6 rounded-[32px] border border-purple-100 shadow-inner group overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <span className="block text-4xl font-black text-[#1E3A8A] tracking-tight">{saka || t('panchangLoading')}</span>
+          <span className="block text-lg font-bold text-purple-800 mt-2 opacity-80">{std}</span>
+        </div>
       </div>
-      <div className="p-4 bg-bg-primary rounded-2xl text-center text-sm font-bold text-text-sub opacity-80 border border-border-gray">
+
+      <div className="p-5 bg-bg-primary rounded-[24px] text-center text-xs font-black text-gray-400 uppercase tracking-widest border border-gray-100">
         {t('panchangDesc')}
       </div>
     </div>
   )
 }
 
-// =====================================================
-// 4. MAIN VIEWS
-// =====================================================
+const BlogView = ({ onNavigate }) => {
+  const { t, lang } = useLang()
+  
+  return (
+    <div className="space-y-12 pb-20 px-4">
+      <header className="text-center space-y-4 max-w-4xl mx-auto pt-8">
+        <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-full text-[12px] font-bold text-[#1E3A8A] uppercase tracking-wide">
+          <BookOpen size={16} /> {t('navBlogUpdates')}
+        </motion.div>
+        <h2 className="text-4xl md:text-5xl font-black text-text-main tracking-tight">
+          {t('blogTitleMain')}
+        </h2>
+        <p className="text-text-sub text-lg font-bold max-w-2xl mx-auto leading-relaxed">
+          {t('blogSubtitle')}
+        </p>
+      </header>
 
-const HomeView = ({ onNavigate, onSelectAction }) => {
-  const { t } = useLang()
-  const [query, setQuery] = useState('')
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        {BLOG_POSTS.map((post) => (
+          <motion.div 
+            key={post.id} 
+            whileHover={{ y: -10 }}
+            className="bg-white rounded-[32px] overflow-hidden shadow-soft border border-border-gray hover:shadow-strong transition-all flex flex-col group"
+          >
+            <div className="h-48 md:h-64 overflow-hidden relative">
+              <img 
+                src={post.image} 
+                alt={post.title[lang]} 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+              <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl text-[10px] font-black text-[#1E3A8A] border border-blue-50 shadow-sm">
+                {post.date}
+              </div>
+            </div>
+            <div className="p-8 space-y-4 flex-1 flex flex-col">
+              <h3 className="text-xl md:text-2xl font-black text-text-main leading-tight group-hover:text-[#1E3A8A] transition-colors">
+                {post.title[lang]}
+              </h3>
+              <p className="text-text-sub font-semibold leading-relaxed flex-1">
+                {post.excerpt[lang]}
+              </p>
+              <div className="pt-4 border-t border-border-gray flex items-center justify-between">
+                <span className="text-xs font-bold text-text-sub/60 uppercase tracking-widest">{t('blogDate')}: {post.date}</span>
+                <button onClick={() => onNavigate(`blog/${post.id}`)} className="text-[#1E3A8A] font-black text-sm flex items-center gap-1 group/btn cursor-pointer">
+                  {t('blogReadMore')} 
+                  <ChevronRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+
+const BlogPostDetail = ({ post, onBack, onNavigate }) => {
+  const { t, lang } = useLang()
+  const [isPlaying, setIsPlaying] = useState(false)
+  
+  if (!post) return null
+
+  const handleTTS = () => {
+    if (!('speechSynthesis' in window)) {
+      alert(t('ttsError'))
+      return
+    }
+    
+    if (isPlaying) {
+      window.speechSynthesis.cancel()
+      setIsPlaying(false)
+      return
+    }
+
+    const textToRead = `${post.title[lang]}. ` + t(post.contentKey)
+    const utterance = new SpeechSynthesisUtterance(textToRead)
+    utterance.lang = lang === 'mr' ? 'mr-IN' : lang === 'hi' ? 'hi-IN' : 'en-IN'
+    utterance.rate = 0.9
+    
+    utterance.onend = () => setIsPlaying(false)
+    utterance.onerror = () => setIsPlaying(false)
+
+    window.speechSynthesis.speak(utterance)
+    setIsPlaying(true)
+  }
+
+  // Ensure TTS stops when user navigates away
+  useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) window.speechSynthesis.cancel()
+    }
+  }, [])
 
   return (
-    <div className="space-y-16 md:space-y-24 px-4 pb-20">
-      {/* Header Layout */}
-      <section className="text-center pt-8 md:pt-16 space-y-8 max-w-4xl mx-auto">
-        <div className="space-y-4">
-          <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-full text-[12px] font-bold text-[#1E3A8A] uppercase tracking-wide">
-            <Shield size={16} /> {t('heroBadge')}
-          </motion.div>
-          <h2 className="text-4xl md:text-6xl font-black text-text-main tracking-tight leading-tight">
-            {t('heroTitle1')} <span className="text-[#1E3A8A] italic">{t('heroTitleAccent')}</span> {t('heroTitle2')}
+    <article className="max-w-4xl mx-auto px-4 py-12 space-y-10 animate-fade-in-up">
+      <nav className="flex items-center gap-4 text-sm font-bold text-text-sub">
+        <button onClick={onBack} className="hover:text-[#1E3A8A] transition-colors cursor-pointer">{t('blogHome')}</button>
+        <ChevronRight size={14} />
+        <span className="text-text-main truncate max-w-[200px] md:max-w-none">{post.title[lang]}</span>
+      </nav>
+
+      <header className="space-y-6">
+        <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-full text-[12px] font-bold text-[#1E3A8A] uppercase tracking-wide">
+          <BookOpen size={16} /> {t('blogPostDetail')}
+        </motion.div>
+        <h1 className="text-3xl md:text-5xl font-black text-text-main leading-tight">
+          {post.title[lang]}
+        </h1>
+        <div className="flex flex-wrap items-center gap-4 md:gap-6 pt-2 border-b border-border-gray pb-6">
+          <div className="flex items-center gap-2">
+            <Calendar size={18} className="text-[#1E3A8A]" />
+            <span className="text-sm font-bold text-text-sub">{post.date}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <UserIcon size={18} className="text-[#1E3A8A]" />
+            <span className="text-sm font-bold text-text-sub">Land Sathi Editor</span>
+          </div>
+          <button 
+            onClick={handleTTS} 
+            className={`ml-auto flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all focus:outline-none ${isPlaying ? 'bg-orange-100 text-orange-600 border border-orange-200 animate-pulse' : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'}`}
+          >
+            {isPlaying ? <span className="flex items-center gap-2"><span className="w-2 h-2 bg-orange-600 rounded-full animate-ping"></span>{t('ttsReading')}</span> : <span className="flex items-center gap-2"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5 10v4a2 2 0 002 2h4l5 5V3l-5 5H7a2 2 0 00-2 2z" /></svg>{t('ttsListen')}</span>}
+          </button>
+        </div>
+      </header>
+
+      <div className="rounded-[40px] overflow-hidden shadow-strong aspect-video">
+        <img src={post.image} alt={post.title[lang]} className="w-full h-full object-cover" />
+      </div>
+
+      <div className="space-y-8">
+        <div className="space-y-6">
+          {t(post.contentKey).split('\n\n').map((para, i) => (
+            <p key={i} className="text-xl md:text-2xl font-semibold text-text-main leading-relaxed">
+              {para.split('\n').map((line, j) => (
+                <span key={j}>
+                  {line}
+                  {j < para.split('\n').length - 1 && <br />}
+                </span>
+              ))}
+            </p>
+          ))}
+        </div>
+        
+        <div className="p-8 bg-bg-primary rounded-[32px] border border-border-gray space-y-4">
+          <h2 className="text-2xl font-black text-[#1E3A8A] flex items-center gap-3">
+            <Info size={28} /> {t('helpCard3Title')}
           </h2>
-          <p className="text-text-sub text-lg md:text-xl font-bold max-w-2xl mx-auto leading-relaxed">
-            {t('heroDesc')}
+          <p className="font-semibold text-text-sub leading-loose">
+            {t('blogPostDisclaimer')}
           </p>
         </div>
 
-        {/* Search Layout */}
-        <div className="max-w-3xl mx-auto relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-green-600/20 rounded-[28px] blur-xl opacity-0 group-hover:opacity-100 transition duration-1000"></div>
-          <div className="relative bg-white shadow-strong rounded-[24px] flex items-center p-2 border-2 border-transparent focus-within:border-[#1E3A8A] transition-all">
-            <div className="pl-5 text-text-sub/40"><Search size={28} /></div>
-            <input 
-              value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onNavigate('chat')} 
-              placeholder={t('searchPlaceholder')} className="w-full bg-transparent px-4 py-5 md:py-6 outline-none text-xl font-bold placeholder:text-text-sub/30 text-text-main" 
-            />
-            <div className="pr-2 flex items-center gap-2">
-              <button className="hidden md:flex p-4 text-[#1E3A8A] bg-bg-primary hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"><Mic size={28} /></button>
-              <Button onClick={() => onNavigate('chat')} className="px-8 md:px-12 group">
-                {t('searchBtn')} <ChevronRight size={22} className="group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </div>
+        <section className="space-y-6 pt-10">
+          <h2 className="text-2xl font-black text-text-main">{t('relatedTopics')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             {BLOG_POSTS.filter(p => p.id !== post.id).map(p => (
+               <button key={p.id} onClick={() => onNavigate(`blog/${p.id}`)} className="text-left p-6 bg-white border border-border-gray rounded-2xl hover:border-[#1E3A8A] transition-all group cursor-pointer">
+                 <h4 className="font-bold text-text-main group-hover:text-[#1E3A8A]">{p.title[lang]}</h4>
+                 <div className="flex items-center gap-2 mt-2 text-[#1E3A8A] font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                    {t('blogReadMore')} <ChevronRight size={14} />
+                 </div>
+               </button>
+             ))}
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      {/* Quick Actions Grid */}
-      <section className="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6 max-w-7xl mx-auto">
-        {QUICK_ACTION_META.map((action) => (
-          <motion.div key={action.id} whileHover={{ y: -8 }} className="group">
-            <button
-              onClick={() => onSelectAction(action.id)}
-              className="w-full flex flex-col items-center justify-center p-8 md:p-10 bg-white rounded-[28px] shadow-soft border border-border-gray transition-all hover:shadow-strong group-hover:border-[#1E3A8A] cursor-pointer"
-            >
-              <div className={`w-14 h-14 md:w-20 md:h-20 rounded-[22px] mb-4 flex items-center justify-center transition-all group-hover:scale-110 shadow-sm ${action.color}`}>
-                {action.icon}
-              </div>
-              <span className="font-bold text-lg md:text-xl text-text-main text-center leading-tight">{t(action.labelKey)}</span>
-              <span className="text-[10px] uppercase font-bold text-text-sub mt-2 tracking-wider opacity-60">{t(action.subKey)}</span>
-            </button>
-          </motion.div>
-        ))}
-      </section>
+      <footer className="pt-12 border-t border-border-gray text-center">
+        <Button onClick={onBack} variant="outline" className="mx-auto">
+          <ArrowLeft size={20} /> {t('backToBlog')}
+        </Button>
+      </footer>
+    </article>
+  )
+}
 
-      {/* Forms & Docs Section */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
-        <ContactForm />
-        <DocumentForm onShowDocs={(id) => onNavigate(`docs/${id}`)} />
-      </section>
 
-      {/* Land Tools Grid */}
-      <section className="max-w-7xl mx-auto space-y-10">
-        <div className="text-center space-y-3">
-          <span className="inline-block px-4 py-2 bg-blue-50 text-[#1E3A8A] text-xs font-bold rounded-lg uppercase tracking-widest">{t('toolTitleBadge')}</span>
-          <h2 className="text-3xl md:text-4xl font-black text-text-main">{t('toolTitleMain')}</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+// WhatsApp Share Button
+const WhatsAppShare = ({ lang = 'mr' }) => {
+  const shareUrl = window.location.href
+  const text = lang === 'mr' ? 'Land Sathi - जमीन माहिती मार्गदर्शक 🏡' : lang === 'hi' ? 'Land Sathi - जमीन जानकारी मार्गदर्शक 🏡' : 'Land Sathi - Digital Land Records Guide 🏡'
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(text + '\n' + shareUrl)}`
+  return (
+    <a href={waUrl} target="_blank" rel="noopener noreferrer"
+      className="fixed bottom-24 right-6 z-40 bg-[#25D366] text-white p-4 rounded-full shadow-[0_10px_40px_rgba(37,211,102,0.4)] hover:scale-110 active:scale-95 transition-all cursor-pointer">
+      <Share2 size={24} />
+    </a>
+  )
+}
+
+// =====================================================
+// 4. TOOLS VIEW
+// =====================================================
+
+const ToolsView = ({ onNavigate }) => {
+  const { lang, t } = useLang()
+  const title = { mr: 'सर्व साधने आणि कॅल्क्युलेटर', hi: 'सभी उपकरण और कैल्कुलेटर', en: 'All Tools & Calculators' }
+  const sub = { mr: 'जमीन व्यवहारासाठी आवश्यक सर्व साधने एकाच ठिकाणी', hi: 'भूमि लेनदेन के लिए सभी जरूरी उपकरण एक जगह', en: 'All essential tools for land transactions in one place' }
+
+  return (
+    <div className="space-y-12 pb-20 px-4">
+      <header className="text-center space-y-4 max-w-4xl mx-auto pt-8">
+        <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-full text-[12px] font-bold text-[#1E3A8A] uppercase tracking-wide">
+          <Wrench size={16} /> {t('toolsCalculators')}
+        </motion.div>
+        <h2 className="text-4xl md:text-5xl font-black text-text-main tracking-tight">{title[lang]}</h2>
+        <p className="text-text-sub text-lg font-bold max-w-2xl mx-auto leading-relaxed">{sub[lang]}</p>
+      </header>
+
+      {/* Calculators Row */}
+      <section className="max-w-7xl mx-auto space-y-6">
+        <h3 className="text-2xl font-black text-text-main flex items-center gap-3"><Calculator size={24} className="text-[#1E3A8A]" /> {lang === 'mr' ? 'कॅल्क्युलेटर आणि साधने' : lang === 'hi' ? 'कैल्कुलेटर और उपकरण' : 'Calculators & Tools'}</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <StampDutyCalc lang={lang} />
+          <EMICalc lang={lang} />
           <LandConverter />
-          <WeatherCard />
-          <OfficialLinks />
-          <PanchangCard />
         </div>
       </section>
 
-      {/* Help Cards */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
-        {[
-          { icon: <MessageCircle size={32} />, title: t('helpCard1Title'), desc: t('helpCard1Desc'), color: 'bg-blue-50 text-[#1E3A8A]' },
-          { icon: <BookOpen size={32} />, title: t('helpCard2Title'), desc: t('helpCard2Desc'), color: 'bg-green-50 text-[#16A34A]' },
-          { icon: <Layout size={32} />, title: t('helpCard3Title'), desc: t('helpCard3Desc'), color: 'bg-orange-50 text-[#F59E0B]' },
-        ].map((card, i) => (
-          <div key={i} className="bg-white p-8 rounded-[32px] shadow-soft border border-border-gray hover:shadow-strong transition-all group">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform ${card.color}`}>
-              {card.icon}
-            </div>
-            <h4 className="text-xl font-bold text-text-main mb-3">{card.title}</h4>
-            <p className="text-text-sub font-semibold leading-relaxed">{card.desc}</p>
+      {/* Advanced Features (Tier 3) */}
+      <section className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <DocAnalyzer lang={lang} />
+        <CaseTracker lang={lang} />
+      </section>
+
+      {/* Scheme Finder, Office Locator, Ready Reckoner */}
+      <section className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <SchemeFinder lang={lang} />
+        <OfficeLocator lang={lang} />
+        <ReadyReckoner lang={lang} />
+      </section>
+
+      {/* Document Templates & Community */}
+      <section className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <DocTemplates lang={lang} />
+        <CommunityForum lang={lang} />
+      </section>
+
+      {/* Glossary */}
+      <section className="max-w-7xl mx-auto">
+        <Glossary lang={lang} />
+      </section>
+
+      {/* FAQ */}
+      <section className="max-w-7xl mx-auto">
+        <FAQSection lang={lang} />
+      </section>
+
+      {/* Weather + Panchang + Links */}
+      <section className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        <WeatherCard />
+        <PanchangCard />
+        <OfficialLinks />
+      </section>
+    </div>
+  )
+}
+
+// =====================================================
+// 5. MAIN VIEWS
+// =====================================================
+
+const HomeView = ({ onNavigate, onSelectAction }) => {
+  const { t, lang } = useLang()
+  const [query, setQuery] = useState('')
+  const [isListening, setIsListening] = useState(false)
+
+  const handleVoiceSearch = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert(lang === 'mr' ? 'तुमचा ब्राउझर व्हॉइस सर्चला सपोर्ट करत नाही.' : 'Your browser does not support Voice Search.')
+      return
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    const recognition = new SpeechRecognition()
+    recognition.lang = lang === 'mr' ? 'mr-IN' : lang === 'hi' ? 'hi-IN' : 'en-IN'
+    
+    recognition.onstart = () => setIsListening(true)
+    recognition.onresult = (event) => {
+      setQuery(event.results[0][0].transcript)
+      setIsListening(false)
+    }
+    recognition.onerror = () => setIsListening(false)
+    recognition.onend = () => setIsListening(false)
+    recognition.start()
+  }
+
+  return (
+    <div className="space-y-12 px-4 pb-20 pt-4 max-w-7xl mx-auto">
+      {/* 1. Header Section */}
+      <section className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button onClick={() => onNavigate('profile')} className="w-14 h-14 bg-[#1E3A8A] rounded-[22px] flex items-center justify-center text-white border-2 border-white shadow-xl hover:scale-110 transition-all duration-300">
+            <UserIcon size={28} />
+          </button>
+          <div>
+            <h2 className="text-2xl font-black text-gray-900 leading-tight">Rajesh Patil</h2>
+            <p className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full uppercase tracking-widest inline-flex items-center gap-1.5 mt-1">
+               <ShieldCheck size={12} /> Premium Member
+            </p>
           </div>
-        ))}
+        </div>
+        <div className="flex gap-3">
+           <button className="w-12 h-12 bg-white border border-gray-100 rounded-2xl flex items-center justify-center text-gray-500 shadow-sm hover:bg-gray-50 transition-all"><Bell size={24} /></button>
+           <button onClick={() => onNavigate('chat')} className="w-12 h-12 bg-[#1E3A8A] rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 hover:scale-110 transition-all"><MessageCircle size={24} /></button>
+        </div>
+      </section>
+
+      {/* 2. Manage Portfolio Card (Premium Glassmorphism) */}
+      <section className="relative group overflow-hidden rounded-[40px] shadow-[0_30px_60px_rgba(30,58,138,0.15)]">
+         <div className="absolute inset-0 bg-gradient-to-br from-[#1E3A8A] via-[#2563EB] to-[#3B82F6]"></div>
+         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-white/15 transition-all duration-700"></div>
+         <div className="relative p-8 md:p-12 flex flex-col md:flex-row md:items-center justify-between gap-10">
+            <div className="space-y-8">
+               <div className="space-y-2">
+                  <span className="text-[11px] font-black uppercase tracking-[0.3em] text-white/60">{t('manageHomeCardSub')}</span>
+                  <h3 className="text-4xl md:text-5xl font-black text-white tracking-tight">{t('manageHomeCardTitle')}</h3>
+               </div>
+               <div className="flex gap-12 items-end">
+                  <div className="space-y-2">
+                     <span className="block text-white/50 text-[10px] font-black uppercase tracking-widest">{t('manageStat2Title')}</span>
+                     <span className="text-4xl font-black text-white leading-none">04</span>
+                  </div>
+                  <div className="h-10 w-px bg-white/10 mb-1"></div>
+                  <div className="space-y-2">
+                     <span className="block text-white/50 text-[10px] font-black uppercase tracking-widest">Verified</span>
+                     <span className="text-4xl font-black text-emerald-400 leading-none flex items-center gap-2">03 <CheckCircle2 size={24} /></span>
+                  </div>
+               </div>
+               <button onClick={() => onNavigate('profile')} className="px-10 py-4 bg-white text-[#1E3A8A] rounded-[22px] font-black text-sm uppercase tracking-widest shadow-2xl hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all">
+                  {t('manageViewBenefits')}
+               </button>
+            </div>
+            
+            <div className="bg-white/10 backdrop-blur-xl rounded-[36px] p-8 border border-white/20 min-w-[300px] shadow-2xl">
+               <h4 className="font-black text-white text-xs mb-6 uppercase tracking-[0.2em] flex items-center gap-3">
+                  <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_15px_rgba(52,211,153,0.5)]"></span>
+                  {t('manageMemberBenefits')}
+               </h4>
+               <ul className="space-y-5">
+                  {[
+                    { icon: <ShieldCheck size={20} />, text: 'Land Protection Active', color: 'text-emerald-300' },
+                    { icon: <Clock size={20} />, text: 'Real-time Mutation alerts', color: 'text-blue-300' },
+                    { icon: <FileText size={20} />, text: 'Instant 7/12 Downloads', color: 'text-orange-300' }
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-4 text-white/90 font-bold text-sm">
+                       <span className={`w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center ${item.color} shadow-inner`}>{item.icon}</span>
+                       {item.text}
+                    </li>
+                  ))}
+               </ul>
+            </div>
+         </div>
+      </section>
+
+      {/* 3. Improved Quick Actions (Grid) */}
+      <section className="space-y-8 py-4">
+        <div className="flex justify-between items-center px-2">
+           <h3 className="font-black text-gray-900 text-lg uppercase tracking-widest">{t('navTools')}</h3>
+           <button onClick={() => onNavigate('tools')} className="text-[#1E3A8A] text-xs font-black uppercase tracking-widest hover:underline">{t('viewAll')}</button>
+        </div>
+        <div className="grid grid-cols-4 md:grid-cols-5 gap-6 md:gap-12">
+          {QUICK_ACTION_META.map((action) => (
+            <motion.div 
+              key={action.id} 
+              whileHover={{ y: -10 }} 
+              className="group"
+            >
+              <button onClick={() => onSelectAction(action.id)} className="w-full flex flex-col items-center justify-start cursor-pointer">
+                <div className="w-[84px] h-[84px] md:w-[104px] md:h-[104px] bg-white rounded-[32px] flex items-center justify-center mb-5 shadow-[0_12px_45px_rgba(0,0,0,0.06)] border border-gray-100 group-hover:bg-[#1E3A8A] transition-all duration-500 group-hover:shadow-[0_25px_50px_rgba(30,58,138,0.25)]">
+                  <img 
+                    src={action.img} 
+                    className="w-[82%] h-[82%] object-contain transition-all duration-700 group-hover:scale-115 group-hover:brightness-0 group-hover:invert filter drop-shadow-md" 
+                    alt={t(action.labelKey)} 
+                  />
+                </div>
+                <span className="text-[11px] md:text-sm font-black text-gray-700 text-center leading-tight tracking-tight uppercase group-hover:text-[#1E3A8A] transition-colors">
+                  {t(action.labelKey).split(' ')[0]}
+                </span>
+                <span className="text-[9px] font-black text-gray-400 text-center mt-2 opacity-60 uppercase tracking-widest">
+                   {t(action.labelKey).split(' ').slice(1).join(' ') || 'Access'}
+                </span>
+              </button>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* 4. AI Search Bar (Floating) */}
+      <section className="relative z-10 py-6">
+          <div className="max-w-4xl mx-auto relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/30 to-indigo-600/30 rounded-[36px] blur-2xl opacity-0 group-hover:opacity-100 transition duration-1000"></div>
+            <div className="relative bg-white shadow-[0_25px_60px_rgba(0,0,0,0.12)] rounded-[36px] flex items-center p-3 border border-gray-100 focus-within:border-[#1E3A8A] transition-all h-24">
+              <div className="pl-6 text-[#1E3A8A] opacity-40"><Search size={32} /></div>
+              <input 
+                value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onNavigate('chat')} 
+                placeholder={t('chatPlaceholder')} className="w-full bg-transparent px-6 outline-none text-2xl font-black placeholder:text-gray-300 text-gray-900" 
+              />
+              <div className="pr-3 flex items-center gap-4">
+                <button onClick={handleVoiceSearch} className={`p-5 rounded-2xl transition-all ${isListening ? 'bg-red-50 text-red-500 shadow-inner' : 'text-gray-400 hover:bg-gray-50'}`}>
+                  <Mic size={30} className={isListening ? 'animate-pulse' : ''} />
+                </button>
+                <button onClick={() => onNavigate('chat')} className="px-12 bg-[#1E3A8A] text-white h-[68px] rounded-2xl font-black text-lg shadow-xl shadow-blue-500/30 hover:bg-[#1D4ED8] hover:scale-[1.02] active:scale-[0.98] transition-all">
+                  {lang === 'hi' ? 'खोजें' : lang === 'mr' ? 'शोधा' : 'Search'}
+                </button>
+              </div>
+            </div>
+          </div>
+      </section>
+
+      {/* 5. Marketplace Scroller */}
+      <section className="space-y-8">
+         <h3 className="font-black text-gray-900 text-lg uppercase tracking-widest px-2">Discovery Hub</h3>
+         <div className="flex gap-8 overflow-x-auto pb-10 no-scrollbar -mx-4 px-4">
+            {[
+               { title: 'Offline Records', sub: 'Access docs without internet', img: '/blog/offline_mode.png', color: 'from-gray-800 to-indigo-900', action: () => onNavigate('profile') },
+               { title: 'PM-Kisan Installment', sub: '₹2,000 coming soon', img: '/blog/pm_kisan.png', color: 'from-orange-500 to-red-500' },
+               { title: 'New 7/12 Digital Sign', sub: 'Get officially verified', img: '/blog/digital_712_legal.png', color: 'from-blue-500 to-indigo-600' },
+               { title: 'Market Value 2026', sub: 'Check latest rates', img: '/blog/stamp_duty.png', color: 'from-purple-500 to-pink-600' },
+            ].map((banner, i) => (
+               <div key={i} onClick={() => banner.action && banner.action()} className="min-w-[320px] h-[200px] rounded-[40px] overflow-hidden relative group cursor-pointer shadow-strong transition-all hover:scale-105">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${banner.color} opacity-90 transition-transform group-hover:scale-110 duration-1000`}></div>
+                  <img src={banner.img} className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-30" alt="" />
+                  <div className="relative p-8 h-full flex flex-col justify-end text-white">
+                     <h4 className="font-black text-2xl leading-tight mb-2">{banner.title}</h4>
+                     <p className="text-xs font-bold opacity-80 uppercase tracking-widest">{banner.sub}</p>
+                     <div className="absolute top-8 right-8 w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                        <ChevronRight size={24} />
+                     </div>
+                  </div>
+               </div>
+            ))}
+         </div>
+      </section>
+
+      {/* 6. Deep Utility Grid */}
+      <section className="space-y-12 pt-10 pb-12">
+        <div className="flex flex-col items-center text-center space-y-4">
+          <span className="inline-block px-6 py-2.5 bg-[#1E3A8A]/5 text-[#1E3A8A] text-[11px] font-black rounded-full uppercase tracking-[0.25em] border border-[#1E3A8A]/10">{t('toolTitleBadge')}</span>
+          <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tight leading-none">{t('toolTitleMain')}</h2>
+          <p className="text-gray-400 font-bold max-w-2xl mx-auto">{t('toolsCalculators')}</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10">
+          <LandConverter />
+          <StampDutyCalc lang={lang} />
+          <WeatherCard />
+          <EMICalc lang={lang} />
+        </div>
+      </section>
+
+      {/* 7. Community Trust & Impact (Testimonials) */}
+      <section className="space-y-10 py-12 border-t border-gray-100">
+         <div className="flex justify-between items-end px-2">
+            <div className="space-y-2">
+               <span className="text-[10px] font-black text-[#1E3A8A] uppercase tracking-widest">{t('successStories')}</span>
+               <h3 className="text-3xl font-black text-gray-900 tracking-tight">{t('trustedByThousands')}</h3>
+            </div>
+            <div className="flex gap-2 mb-1">
+               <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><Users size={20} /></div>
+               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><Star size={20} /></div>
+            </div>
+         </div>
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+               { name: 'Suresh More', location: 'Satara', text: t('testimonial1'), rating: 5 },
+               { name: 'Amol Deshmukh', location: 'Nagpur', text: t('testimonial2'), rating: 5 },
+               { name: 'Vithal Patil', location: 'Nashik', text: t('testimonial3'), rating: 5 }
+            ].map((item, i) => (
+               <div key={i} className="bg-white p-8 rounded-[36px] shadow-[0_15px_40px_rgba(0,0,0,0.05)] border border-gray-50 flex flex-col justify-between hover:shadow-xl transition-all">
+                  <div className="space-y-4">
+                     <div className="flex gap-1 text-emerald-500">
+                        {[...Array(item.rating)].map((_, i) => <Star key={i} size={14} fill="currentColor" />)}
+                     </div>
+                     <p className="text-gray-600 italic font-bold">"{item.text}"</p>
+                  </div>
+                  <div className="flex items-center gap-4 mt-8 pt-6 border-t border-gray-50">
+                     <div className="w-12 h-12 bg-[#1E3A8A]/10 rounded-full flex items-center justify-center font-black text-[#1E3A8A]">{item.name[0]}</div>
+                     <div>
+                        <h5 className="font-black text-gray-900">{item.name}</h5>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{item.location}</p>
+                     </div>
+                  </div>
+               </div>
+            ))}
+         </div>
+      </section>
+
+      {/* 8. Help & SOS CTA (Airtel "Broadband Support" style banner) */}
+      <section className="bg-[#1E3A8A] rounded-[40px] p-8 md:p-12 relative overflow-hidden group">
+         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+            <div className="space-y-4 text-center md:text-left">
+               <h3 className="text-3xl font-black text-white tracking-tight">{t('needExpertHelp')}</h3>
+               <p className="text-white/70 font-bold max-w-md">{t('expertHelpDesc')}</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+               <button className="px-10 py-5 bg-white text-[#1E3A8A] rounded-[24px] font-black uppercase tracking-widest shadow-2xl hover:scale-105 transition-transform flex items-center justify-center gap-3">
+                  <PhoneCall size={20} /> {t('callNow')}
+               </button>
+               <button onClick={() => onNavigate('chat')} className="px-10 py-5 bg-white/10 backdrop-blur-md text-white border border-white/20 rounded-[24px] font-black uppercase tracking-widest hover:bg-white/20 transition-all flex items-center justify-center gap-3">
+                  <MessageCircle size={20} /> {t('askAI')}
+               </button>
+            </div>
+         </div>
       </section>
     </div>
   )
@@ -582,10 +1328,10 @@ const AIAssistantChat = ({ initialAction, onBack }) => {
       if (initialAction === 'ferfar') {
         roadmap = {
           steps: [
-            { title: t('aiFerfarStep1'), desc: t('aiFerfarStep1Desc'), office: 'Talathi Office', icon: <FileText size={20} /> },
-            { title: t('aiFerfarStep2'), desc: t('aiFerfarStep2Desc'), office: 'Talathi Office', icon: <Search size={20} /> },
-            { title: t('aiFerfarStep3'), desc: t('aiFerfarStep3Desc'), office: 'Village Board', icon: <Clock size={20} /> },
-            { title: t('aiFerfarStep4'), desc: t('aiFerfarStep4Desc'), office: 'Tehsil Office', icon: <CheckCircle2 size={20} /> },
+            { title: t('aiFerfarStep1'), desc: t('aiFerfarStep1Desc'), office: t('officeTalathi'), icon: <FileText size={20} /> },
+            { title: t('aiFerfarStep2'), desc: t('aiFerfarStep2Desc'), office: t('officeTalathi'), icon: <Search size={20} /> },
+            { title: t('aiFerfarStep3'), desc: t('aiFerfarStep3Desc'), office: t('officeVillage'), icon: <Clock size={20} /> },
+            { title: t('aiFerfarStep4'), desc: t('aiFerfarStep4Desc'), office: t('officeTehsil'), icon: <CheckCircle2 size={20} /> },
           ]
         }
       }
@@ -630,7 +1376,7 @@ const AIAssistantChat = ({ initialAction, onBack }) => {
     } catch (err) {
       console.error("AI Error:", err)
       // Fallback if backend is down
-      let botText = "Disconnected from AI server. Please check your connection."
+      let botText = t('aiError')
       setMessages(prev => [...prev, { id: Date.now() + 1, text: botText, isAI: true }])
     } finally {
       setIsTyping(false)
@@ -744,19 +1490,61 @@ const AIAssistantChat = ({ initialAction, onBack }) => {
 function Main() {
   const [view, setView] = useState('home')
   const [selectedAction, setSelectedAction] = useState(null)
-  const { t } = useLang()
+  const langContext = useLang()
+  
+  if (!langContext) return <div className="p-20 text-red-500 font-bold">CRITICAL: LangContext is null! Check Provider nesting.</div>
+  
+  const { t, lang } = langContext
 
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '')
-    if (hash.startsWith('docs/')) {
-      setSelectedAction(hash.split('/')[1])
-      setView('docs')
-    } else if (hash === 'chat') {
-      setView('chat')
-    } else {
-      setView('home')
+    window.onerror = (msg, url, line, col, error) => {
+      console.log(`%c CRASH: ${msg}`, 'background: red; color: white; padding: 4px;');
+      if (error) console.error(error);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash.replace('#', '')
+      if (hash.startsWith('docs/')) {
+        setSelectedAction(hash.split('/')[1])
+        setView('docs')
+      } else if (hash === 'chat') {
+        setView('chat')
+      } else if (hash === 'blog') {
+        setView('blog')
+        setSelectedAction(null)
+      } else if (hash === 'tools') {
+        setView('tools')
+      } else if (hash === 'profile') {
+        setView('profile')
+      } else if (hash.startsWith('blog/')) {
+        setSelectedAction(hash.split('/')[1])
+        setView('blog-detail')
+      } else {
+        setView('home')
+        setSelectedAction(null)
+      }
     }
+
+    handleHash()
+    window.addEventListener('hashchange', handleHash)
+    return () => window.removeEventListener('hashchange', handleHash)
   }, [])
+
+  // Dynamic Metadata Effect
+  useEffect(() => {
+    if (view === 'blog-detail' && selectedAction) {
+      const post = BLOG_POSTS.find(p => p.id === parseInt(selectedAction))
+      if (post) {
+        document.title = `${post.title[lang]} | Land Sathi Blog`
+        const metaDesc = document.querySelector('meta[name="description"]')
+        if (metaDesc) metaDesc.setAttribute('content', post.excerpt[lang])
+      }
+    } else {
+      document.title = 'Land Sathi - Digital Land Records Guide'
+    }
+  }, [view, selectedAction, lang])
 
   const navigate = (to) => {
     if (to.startsWith('docs/')) {
@@ -766,6 +1554,19 @@ function Main() {
     } else if (to === 'chat') {
       setView('chat')
       window.location.hash = 'chat'
+    } else if (to === 'blog') {
+      setView('blog')
+      window.location.hash = 'blog'
+    } else if (to === 'tools') {
+      setView('tools')
+      window.location.hash = 'tools'
+    } else if (to === 'profile') {
+      setView('profile')
+      window.location.hash = 'profile'
+    } else if (to.startsWith('blog/')) {
+      setSelectedAction(to.split('/')[1])
+      setView('blog-detail')
+      window.location.hash = to
     } else {
       setView('home')
       window.location.hash = ''
@@ -791,11 +1592,38 @@ function Main() {
           )}
           {view === 'docs' && (
             <motion.div key="docs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <DocumentChecklist type={selectedAction} />
+              {selectedAction === 'quiz' ? <div className="max-w-4xl mx-auto py-10"><SchemeFinder lang={lang} /></div> : <DocumentChecklist type={selectedAction} />}
+            </motion.div>
+          )}
+          {view === 'blog' && (
+            <motion.div key="blog" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <BlogView onNavigate={navigate} />
+            </motion.div>
+          )}
+          {view === 'tools' && (
+            <motion.div key="tools" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <ToolsView onNavigate={navigate} />
+            </motion.div>
+          )}
+          {view === 'blog-detail' && (
+            <motion.div key="blog-detail" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+              <BlogPostDetail 
+                post={BLOG_POSTS.find(p => p.id === parseInt(selectedAction))} 
+                onBack={() => navigate('blog')} 
+                onNavigate={navigate}
+              />
+            </motion.div>
+          )}
+          {view === 'profile' && (
+            <motion.div key="profile" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}>
+              <FarmerProfile />
             </motion.div>
           )}
         </AnimatePresence>
       </main>
+
+      {/* WhatsApp Share Button */}
+      {view !== 'chat' && <WhatsAppShare lang={lang} />}
 
       {/* Floating AI Assistant Button */}
       {view === 'home' && (
@@ -804,26 +1632,47 @@ function Main() {
           className="fixed bottom-6 right-6 z-40 bg-[#1E3A8A] text-white p-4 md:p-5 rounded-full shadow-[0_10px_40px_rgba(30,58,138,0.4)] flex items-center gap-3 hover:scale-105 active:scale-95 transition-all cursor-pointer group"
         >
           <MessageCircle size={28} />
-          <span className="hidden md:inline font-bold text-lg pr-2">Ask Land Sathi AI</span>
+          <span className="hidden md:inline font-bold text-lg pr-2">{t('navAskAIButton')}</span>
         </button>
       )}
 
       {view !== 'chat' && (
         <footer className="border-t border-border-gray bg-white py-16 px-6 mt-20">
           <div className="max-w-7xl mx-auto flex flex-col items-center text-center gap-10">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 justify-center">
-                <Map size={24} className="text-[#1E3A8A]" />
-                <span className="font-bold text-2xl text-[#1E3A8A]">{t('navTitle')}</span>
-              </div>
-              <p className="text-[14px] text-text-sub font-bold max-w-lg">{t('footerDisclaimer')}</p>
-            </div>
-            
-            <div className="flex flex-wrap justify-center gap-10 text-sm font-bold uppercase tracking-widest text-text-sub">
-              <button className="hover:text-[#1E3A8A] cursor-pointer">About</button>
-              <button className="hover:text-[#1E3A8A] cursor-pointer">Legal</button>
-              <button className="hover:text-[#1E3A8A] cursor-pointer">Help</button>
-              <button className="hover:text-[#1E3A8A] cursor-pointer">Privacy</button>
+            {/* Blog Quick Navigation Section */}
+            <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-4 gap-12 text-left mb-16 pb-16 border-b border-border-gray">
+               <div className="col-span-1 md:col-span-1 space-y-6">
+                  <div className="flex items-center gap-3">
+                     <div className="bg-[#1E3A8A] p-2 rounded-xl text-white shadow-lg"><Map size={24} /></div>
+                     <span className="font-black text-2xl text-[#1E3A8A] tracking-tighter">{t('navTitle')}</span>
+                  </div>
+                  <p className="text-sm font-bold text-text-sub leading-relaxed">{t('footerDisclaimer')}</p>
+               </div>
+               
+               <div className="md:col-span-2 space-y-6">
+                  <h4 className="font-black text-sm uppercase tracking-widest text-text-main flex items-center gap-2">
+                     <BookOpen size={16} className="text-[#1E3A8A]" /> {t('blogTitle')}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                     {BLOG_POSTS.slice(0, 4).map(post => (
+                        <button key={post.id} onClick={() => navigate(`blog/${post.id}`)} className="text-left group cursor-pointer space-y-1">
+                           <span className="block text-xs font-black text-[#1E3A8A] opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-x-2 group-hover:translate-x-0">→</span>
+                           <h5 className="text-[13px] font-bold text-text-sub group-hover:text-[#1E3A8A] transition-colors leading-tight line-clamp-1">{post.title[lang]}</h5>
+                        </button>
+                     ))}
+                  </div>
+               </div>
+
+               <div className="space-y-6">
+                  <h4 className="font-black text-sm uppercase tracking-widest text-text-main flex items-center gap-2">
+                     <Link2 size={16} className="text-[#1E3A8A]" /> {t('footerAbout')}
+                  </h4>
+                  <div className="flex flex-col gap-3">
+                     {['footerAbout', 'footerLegal', 'footerHelp', 'footerPrivacy'].map(key => (
+                        <button key={key} className="text-left text-sm font-bold text-text-sub hover:text-[#1E3A8A] transition-all cursor-pointer">{t(key)}</button>
+                     ))}
+                  </div>
+               </div>
             </div>
 
             <div className="flex flex-col md:flex-row items-center gap-10 border-t border-border-gray pt-10 w-full justify-between">
